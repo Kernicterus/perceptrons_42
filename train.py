@@ -32,6 +32,22 @@ def checkArgs(args) -> bool :
     return True
 
 
+def nbNeuronsCalculation(stdDatas : pd.DataFrame, realResults : pd.Series, network : dict) -> np.array :
+    nbNeurons = np.array([len(stdDatas.columns)])
+    i = 0
+    for item in network :
+        if item.startswith("hidden_layer") :
+            i += 1
+            nbNeurons = np.append(nbNeurons, network[f"hidden_layer_{i}"]["neurons"])
+    nbNeurons = np.append(nbNeurons, realResults.nunique())
+    return nbNeurons
+
+
+def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) :
+    network = model[model["model_fit"]["network"]]
+    neuronsByLayer = nbNeuronsCalculation(stdDatas, realResults, network)
+    # weigths = np.array([x * y for x in neuronsByLayer for y in neuronsByLayer])
+
 def main() :
     try :
         if checkArgs(sys.argv) == False:
@@ -52,8 +68,9 @@ def main() :
 
         # step 5 : load the json network architecture
         model = dst.loadJson(sys.argv[2])
-        # step 6 : 
 
+        # step 6 : build the weight matrices + initialization
+        weights = weightsInit(normalizedDatas, binaryResults, model)
         # step 7 :
 
         # step 8 :

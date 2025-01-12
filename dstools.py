@@ -30,7 +30,7 @@ def loadCsvToDf(path: str) -> pd.DataFrame:
     return csv
 
 
-def loadJson(path : str) -> json:
+def loadJson(path : str) -> dict:
     """
     Function to load a json and returns it
     """
