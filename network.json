@@ -6,21 +6,21 @@
         "hidden_layer_1": {
             "neurons": 24,
             "activation": "sigmoid",
-            "weigths_init": "heUniform"
+            "weights_init": "heUniform"
         },
         "hidden_layer_2": {
             "neurons": 24,
             "activation": "sigmoid",
-            "weigths_init": "heUniform"
+            "weights_init": "heUniform"
         },
         "hidden_layer_3": {
             "neurons": 24,
             "activation": "sigmoid",
-            "weigths_init": "heUniform"
+            "weights_init": "heUniform"
         },
         "output_layer": {
             "activation" : "softmax",
-            "weigths_init" : "heUniform"
+            "weights_init" : "heUniform"
         }
     },
     "model_fit" : {

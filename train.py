@@ -32,21 +32,40 @@ def checkArgs(args) -> bool :
     return True
 
 
-def nbNeuronsCalculation(stdDatas : pd.DataFrame, realResults : pd.Series, network : dict) -> np.array :
-    nbNeurons = np.array([len(stdDatas.columns)])
-    i = 0
-    for item in network :
-        if item.startswith("hidden_layer") :
-            i += 1
-            nbNeurons = np.append(nbNeurons, network[f"hidden_layer_{i}"]["neurons"])
-    nbNeurons = np.append(nbNeurons, realResults.nunique())
+def nbNeuronsCalculation(realResults : pd.Series, network : dict) -> list :
+    nbNeurons = []
+    i = 1
+    while f"hidden_layer_{i}" in network:
+        if "neurons" in network[f"hidden_layer_{i}"] :
+            nbNeurons.append(network[f"hidden_layer_{i}"]["neurons"])
+        else :
+            raise AssertionError(f"'neurons' missing in 'hidden_layer_{i}'")
+        i += 1
+    nbNeurons.append(realResults.nunique())
     return nbNeurons
 
 
+def getInitializations(network : dict) -> list:
+    initTypes = []
+    i = 1
+    while f"hidden_layer_{i}" in network:
+        if "weights_init" in network[f"hidden_layer_{i}"] :
+            initTypes.append(network[f"hidden_layer_{i}"]["weights_init"])
+        else : 
+            raise AssertionError(f"'weights_init' missing in 'hidden_layer_{i}'")
+        i += 1
+    initTypes.append(network["output_layer"]["weights_init"])
+    return initTypes
+    
+
 def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) :
     network = model[model["model_fit"]["network"]]
-    neuronsByLayer = nbNeuronsCalculation(stdDatas, realResults, network)
-    # weigths = np.array([x * y for x in neuronsByLayer for y in neuronsByLayer])
+    neuronsByLayer = nbNeuronsCalculation(realResults, network)
+    initTypeByLayer = getInitializations(network)
+    weights = [np.zeros((neuronsByLayer[i], neuronsByLayer[i - 1])) for i in range(1, len(neuronsByLayer))]
+    for id, array in enumerate(weights) :
+        print(f"id : {id}, array: {array}")
+
 
 def main() :
     try :
@@ -77,7 +96,7 @@ def main() :
 
         # step 9 : save the weights and the parameters
     except Exception as e :
-        print(f"Error : {e}")
+        raise Exception(f"Error : {e}")
 
 
 if __name__ == "__main__" :
