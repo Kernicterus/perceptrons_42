@@ -1,7 +1,14 @@
 import numpy as np
 import pandas as pd
+import json
 
-def loadCsv(path : str) -> np.ndarray :
+
+def loadCsvToNp(path : str) -> np.ndarray :
+    """
+    Function to load a csv
+    Parameters : path of the csv
+    Return : np.ndarray containing the csv datass
+    """
     try :
         data = np.genfromtxt(path, delimiter=",", dtype=None, encoding="utf-8")
         return data
@@ -23,7 +30,33 @@ def loadCsvToDf(path: str) -> pd.DataFrame:
     return csv
 
 
+def loadJson(path : str) -> json:
+    """
+    Function to load a json and returns it
+    """
+    try : 
+        with open(path, "r") as file:
+            data = json.load(file)
+        required_keys = {"network", "loss", "learning_rate", "batch_size", "epochs"}
+        if "model_fit" not in data :
+            raise ValueError("model_fit field not found")
+        else : 
+            model = data["model_fit"]
+            if not required_keys.issubset(model.keys()):
+                raise AssertionError("one of the following field of 'model_fit' is missing : \
+network, loss, learning_rate, batch_size, epochs")
+    except Exception as e :
+        raise AssertionError(f"loading json : {e}")
+    return data
+
+
 def saveCsv(outputName : str, datas : np.ndarray) :
+    """
+    Function to save a csv
+    Parameters : 
+    - path of the new file
+    - the dataset
+    """
     try : 
         df = pd.DataFrame(datas)
         df.to_csv(outputName, index=False)
@@ -32,6 +65,11 @@ def saveCsv(outputName : str, datas : np.ndarray) :
 
 
 def randomlySplitCsv(datas : np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Function to separate the dataset into two parts randomly chosen
+    Parameters : a np.ndarray object containing the csv
+    Return : 
+    """ 
     numRows = datas.shape[0]
     shuffledIndexes = np.random.permutation(numRows)
 
@@ -45,9 +83,12 @@ def randomlySplitCsv(datas : np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def prepareCsv(rawDatas : pd.DataFrame) -> pd.DataFrame :
-    print(rawDatas)
+    """
+    Function to clean the dataset by deleting the index column and deleting rows with missing target
+    Parameters : a pd.DataFrame object
+    Return : a new pd.DataFrame containing the cleaned datas
+    """ 
     datas = rawDatas.drop(columns="f0")
-    print(datas)
     datas["f1"] = datas["f1"].replace('', pd.NA)
     datasWithoutEmpty = datas.dropna(subset=['f1'])
     return datasWithoutEmpty
@@ -73,17 +114,23 @@ def extractAndPrepareNumericalDatas(df : pd.DataFrame) -> tuple[pd.DataFrame, pd
     numericalDf = df.select_dtypes(include=['int64', 'float64'])
     parameters = pd.DataFrame(columns=numericalDf.columns, index=['mean', 'std', 'median'])
     for column in numericalDf.columns:
-        # CHANGER AVES NOS PROPRES FONCTIONS
         median = numericalDf[column].median()
         mean = numericalDf[column].mean()
         std = numericalDf[column].std()
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         numericalDf[column] = numericalDf[column].fillna(median)
         parameters[column] = [mean, std, median]
     for column in numericalDf.columns:
         numericalDf[column] = normalizePdSeries(numericalDf[column], parameters[column])
     return numericalDf, parameters
 
+
+def targetBinarization(results: pd.Series) -> pd.Series :
+    """
+    Function that binarize the results between 1 (='M') and 0 (='B')
+    Return the binarized results
+    """  
+    binaryResults = results.apply(lambda x: 1 if x == 'M' else 0)
+    return binaryResults
 
 def sigmoid(z):
     """

@@ -1,0 +1,33 @@
+{
+    "network_1": {
+        "input_layer": {
+            "activation": "sigmoid"
+        },
+        "hidden_layer_1": {
+            "neurons": 24,
+            "activation": "sigmoid",
+            "weigths_init": "heUniform"
+        },
+        "hidden_layer_2": {
+            "neurons": 24,
+            "activation": "sigmoid",
+            "weigths_init": "heUniform"
+        },
+        "hidden_layer_3": {
+            "neurons": 24,
+            "activation": "sigmoid",
+            "weigths_init": "heUniform"
+        },
+        "output_layer": {
+            "activation" : "softmax",
+            "weigths_init" : "heUniform"
+        }
+    },
+    "model_fit" : {
+        "network" : "network_1",
+        "loss" : "binaryCrossEntropy",
+        "learning_rate" : 0.01,
+        "batch_size" : 8,
+        "epochs" : 84
+    }
+}
