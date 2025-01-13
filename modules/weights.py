@@ -2,8 +2,15 @@ import numpy as np
 import pandas as pd
 
 # Initialization functions
-def heUniform(array : np.array) :
-    return (array + 1)
+def heUniform(weightsLayerShape : np.ndarray) :
+    interval = np.sqrt(6 / weightsLayerShape[1])
+    return np.random.uniform(-interval, interval, weightsLayerShape)
+
+
+def heNormal(weightsLayerShape : np.ndarray) :
+    std = np.sqrt(2 / weightsLayerShape[1])
+    return np.random.normal(0, std, weightsLayerShape)
+
 
 # Weights creation
 def nbNeuronsCalculation(stdDatas: pd.DataFrame, realResults : pd.Series, network : dict) -> list :
@@ -43,14 +50,14 @@ def getInitFunc(funcTitle : str) :
         raise ValueError(f"no initialization called '{funcTitle}' found")
     
 
-def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) :
+def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) -> list[np.ndarray]:
     network = model[model["model_fit"]["network"]]
     neuronsByLayer = nbNeuronsCalculation(stdDatas, realResults, network)
-    print(neuronsByLayer)
+    print(f"neurons by layer : {neuronsByLayer}")
     initTypeByLayer = getInitializations(network)
     weights = [np.zeros((neuronsByLayer[i], neuronsByLayer[i - 1])) for i in range(1, len(neuronsByLayer))]
     for id, array in enumerate(weights) :
         initFunc = getInitFunc(initTypeByLayer[id])
-        array = initFunc(array)
+        array = initFunc(array.shape)
         weights[id] = array
-    print(weights)
+    return weights
