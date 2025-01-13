@@ -1,4 +1,4 @@
-import dstools as dst
+import modules.dstools as dst
 import sys
 
 CSV_NAME_TRAIN = "data_train.csv"

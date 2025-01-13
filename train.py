@@ -1,7 +1,5 @@
-import dstools as dst
-import json
-import numpy as np
-import pandas as pd
+import modules.dstools as dst
+import modules.weights as w
 import sys
 import os
 
@@ -32,41 +30,6 @@ def checkArgs(args) -> bool :
     return True
 
 
-def nbNeuronsCalculation(realResults : pd.Series, network : dict) -> list :
-    nbNeurons = []
-    i = 1
-    while f"hidden_layer_{i}" in network:
-        if "neurons" in network[f"hidden_layer_{i}"] :
-            nbNeurons.append(network[f"hidden_layer_{i}"]["neurons"])
-        else :
-            raise AssertionError(f"'neurons' missing in 'hidden_layer_{i}'")
-        i += 1
-    nbNeurons.append(realResults.nunique())
-    return nbNeurons
-
-
-def getInitializations(network : dict) -> list:
-    initTypes = []
-    i = 1
-    while f"hidden_layer_{i}" in network:
-        if "weights_init" in network[f"hidden_layer_{i}"] :
-            initTypes.append(network[f"hidden_layer_{i}"]["weights_init"])
-        else : 
-            raise AssertionError(f"'weights_init' missing in 'hidden_layer_{i}'")
-        i += 1
-    initTypes.append(network["output_layer"]["weights_init"])
-    return initTypes
-    
-
-def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) :
-    network = model[model["model_fit"]["network"]]
-    neuronsByLayer = nbNeuronsCalculation(realResults, network)
-    initTypeByLayer = getInitializations(network)
-    weights = [np.zeros((neuronsByLayer[i], neuronsByLayer[i - 1])) for i in range(1, len(neuronsByLayer))]
-    for id, array in enumerate(weights) :
-        print(f"id : {id}, array: {array}")
-
-
 def main() :
     try :
         if checkArgs(sys.argv) == False:
@@ -89,14 +52,16 @@ def main() :
         model = dst.loadJson(sys.argv[2])
 
         # step 6 : build the weight matrices + initialization
-        weights = weightsInit(normalizedDatas, binaryResults, model)
+        weights = w.weightsInit(normalizedDatas, binaryResults, model)
+
         # step 7 :
 
         # step 8 :
 
         # step 9 : save the weights and the parameters
     except Exception as e :
-        raise Exception(f"Error : {e}")
+        print(f"Error : {e}")
+        # raise Exception(f"Error : {e}")
 
 
 if __name__ == "__main__" :
