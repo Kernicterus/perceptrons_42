@@ -1,5 +1,6 @@
 import modules.dstools as dst
 import modules.weights as w
+import modules.gradiant as grd
 import sys
 import os
 
@@ -45,7 +46,7 @@ def main() :
         # step 3 : extraction, numerization, filling missing values (MEDIAN) and  standardization of numerical datas
         normalizedDatas, numDatasParams = dst.extractAndPrepareNumericalDatas(datas)
 
-        # step 4 : extract and prepare the results
+        # step 4 : extract and prepare the results : M=1, B=0
         binaryResults = dst.targetBinarization(datas['f1'])
 
         # step 5 : load the json network architecture
@@ -54,7 +55,12 @@ def main() :
         # step 6 : build the weight matrices + initialization
         weights = w.weightsInit(normalizedDatas, binaryResults, model)
 
-        # step 7 :
+        # step 7 : gradiant descent
+        learningRate = model["model_fit"]["learning_rate"] 
+        batchSize = model["model_fit"]["batch_size"] 
+        epochs = model["model_fit"]["epochs"] 
+        lossFct = model["model_fit"]["loss"]
+# ---------------WTFFFFFFFFFF !!!!!!!!!!!!!!!!!!!!!!
 
         # step 8 :
 
