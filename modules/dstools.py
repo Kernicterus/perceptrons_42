@@ -132,29 +132,13 @@ def targetBinarization(results: pd.Series) -> pd.Series :
     binaryResults = results.apply(lambda x: 1 if x == 'M' else 0)
     return binaryResults
 
-def sigmoid(z):
-    """
-    Function that calculates the sigmoid of a given value
-    alias g(z) and returns it
-    """    
-    return 1 / (1 + np.exp(-z))
 
-
-def predictionH0(weights : pd.Series, dfLine : pd.Series):
-    """
-    Function that calculates h0(x)
-    by sending 0Tx to the sigmoid function
-    which is the dot product of the weights and the datas
-    requirements : 
-        - df must only contain normalized numerical datas useful for the prediction
-            AND a column of '1' must be added at index 0 for the interception
-        - weights must contain the weights calculated for each variable 
-            + the interception at index 0 
-    """
-
-    if len(weights) != len(dfLine) :
-        raise ValueError("The number of weights must be equal to the number")
-    if dfLine[0] != 1:
-        raise ValueError("The first column of the datas must be '1' for product with interception")
-    thetaTx = np.dot(weights, dfLine)
-    return sigmoid(thetaTx)
+def getActivations(model : dict) :
+    layers = model[model["model_fit"]["network"]]
+    activations = []
+    for layer, layerConfig in layers.items():
+                if "activation" in layerConfig:
+                    activations.append(layerConfig["activation"])
+                else:
+                    raise ValueError(f"The layer '{layer}' is missing the 'activation' key.")
+    return activations

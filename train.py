@@ -1,6 +1,7 @@
 import modules.dstools as dst
 import modules.weights as w
 import modules.gradiant as grd
+import numpy as np
 import sys
 import os
 
@@ -31,6 +32,21 @@ def checkArgs(args) -> bool :
     return True
 
 
+def launchTraining(weights, model, normalizedDatas, yRealResults, biases) :
+    learningRate = model["model_fit"]["learning_rate"] 
+    batchSize = model["model_fit"]["batch_size"] 
+    epochs = model["model_fit"]["epochs"] 
+    lossFct = model["model_fit"]["loss"]
+    activationByLayer = dst.getActivations(model)
+    newWeights = weights
+    for i in range(epochs):
+        for j in range(0, len(normalizedDatas), batchSize) :
+            batchData = np.transpose(normalizedDatas[j:j + batchSize])
+            cacheA, cacheZ = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
+            newWeights = grd.backwardPropagation(yRealResults, (cacheA, cacheZ), newWeights, cacheA, cacheZ)
+    return newWeights
+
+
 def main() :
     try :
         if checkArgs(sys.argv) == False:
@@ -55,12 +71,11 @@ def main() :
         # step 6 : build the weight matrices + initialization
         weights = w.weightsInit(normalizedDatas, binaryResults, model)
 
+        # step 6b : prepare the bias
+        biases = [np.full((weights[i].shape[0], 1), 0.001) for i in range(len(weights))]
+
         # step 7 : gradiant descent
-        learningRate = model["model_fit"]["learning_rate"] 
-        batchSize = model["model_fit"]["batch_size"] 
-        epochs = model["model_fit"]["epochs"] 
-        lossFct = model["model_fit"]["loss"]
-# ---------------WTFFFFFFFFFF !!!!!!!!!!!!!!!!!!!!!!
+        weights = launchTraining(weights, model, normalizedDatas, binaryResults, biases)
 
         # step 8 :
 
