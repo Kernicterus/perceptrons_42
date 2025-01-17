@@ -8,37 +8,30 @@ def sigmoid(z):
     """    
     return 1 / (1 + np.exp(-z))
 
+
 def relu(z) :
-    pass
+    """
+    Function that calculates the RELU of a given vector z
+    and returns it
+    """   
+    return np.maximum(0, z)
 
 
 def softmax(z) :
-    return 1 / (1 + np.exp(-z)) #!!!!!!!!!! to UPD
+    """
+    Function that calculates the softmax of a given vector z
+    and returns it
+    """    
+    zMax = np.max(z)
+    zStable = z - zMax
+    exponentiation = np.exp(zStable)
+    sumExp = np.sum(exponentiation)
+    return exponentiation / sumExp
 
 
 def binaryCrossEntropy() :
     pass
     
-
-def predictionH0(weights : pd.Series, dfLine : pd.Series):
-    """
-    Function that calculates h0(x)
-    by sending 0Tx to the sigmoid function
-    which is the dot product of the weights and the datas
-    requirements : 
-        - df must only contain normalized numerical datas useful for the prediction
-            AND a column of '1' must be added at index 0 for the interception
-        - weights must contain the weights calculated for each variable 
-            + the interception at index 0 
-    """
-
-    if len(weights) != len(dfLine) :
-        raise ValueError("The number of weights must be equal to the number")
-    if dfLine[0] != 1:
-        raise ValueError("The first column of the datas must be '1' for product with interception")
-    thetaTx = np.dot(weights, dfLine)
-    return sigmoid(thetaTx)
-
 
 functionMap = {
     "sigmoid" : sigmoid,
@@ -51,7 +44,7 @@ lossMap = {
 }
 
 
-def forwardPropagation(newWeights, biases, batchData, activationsByLayer) :
+def forwardPropagation(newWeights : list[np.ndarray], biases : list, batchData, activationsByLayer : list) -> tuple:
     cacheZ = {}
     cacheZb = {}
     cacheA = {}
@@ -72,3 +65,8 @@ def forwardPropagation(newWeights, biases, batchData, activationsByLayer) :
         # print (f"cache A {f"l{i}"}: {cacheA[f"l{i}"]}")
 
     return cacheA, cacheZb
+
+
+def backwardPropagation(yRealResults : np.ndarray, caches : tuple, newWeights : list[np.ndarray], activationByLayer : list) -> list[np.ndarray]:
+
+    return newWeights

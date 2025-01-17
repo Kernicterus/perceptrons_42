@@ -51,8 +51,6 @@ def getInitFunc(funcTitle : str) :
     
 
 def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) -> list[np.ndarray]:
-    if not model["model_fit"]["network"] in model:
-        raise AssertionError(f"No '{model["model_fit"]["network"]}' in model")
     network = model[model["model_fit"]["network"]]
     neuronsByLayer = nbNeuronsCalculation(stdDatas, realResults, network)
     print(f"neurons by layer : {neuronsByLayer}")

@@ -32,7 +32,7 @@ def checkArgs(args) -> bool :
     return True
 
 
-def launchTraining(weights, model, normalizedDatas, yRealResults, biases) :
+def launchTraining(weights : list[np.ndarray], model : dict, normalizedDatas : np.ndarray, yRealResults : np.ndarray, biases : list) -> list[np.ndarray]:
     learningRate = model["model_fit"]["learning_rate"] 
     batchSize = model["model_fit"]["batch_size"] 
     epochs = model["model_fit"]["epochs"] 
@@ -42,8 +42,8 @@ def launchTraining(weights, model, normalizedDatas, yRealResults, biases) :
     for i in range(epochs):
         for j in range(0, len(normalizedDatas), batchSize) :
             batchData = np.transpose(normalizedDatas[j:j + batchSize])
-            cacheA, cacheZ = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
-            newWeights = grd.backwardPropagation(yRealResults, (cacheA, cacheZ), newWeights, cacheA, cacheZ)
+            cacheA, cacheZb = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
+            newWeights = grd.backwardPropagation(yRealResults, (cacheA, cacheZb), newWeights, activationByLayer)
     return newWeights
 
 
@@ -75,7 +75,9 @@ def main() :
         biases = [np.full((weights[i].shape[0], 1), 0.001) for i in range(len(weights))]
 
         # step 7 : gradiant descent
-        weights = launchTraining(weights, model, normalizedDatas, binaryResults, biases)
+        normalizedDatasNp = normalizedDatas.to_numpy()
+        dst.saveCsv("dataNormalized.csv", normalizedDatasNp)
+        weights = launchTraining(weights, model, normalizedDatasNp, binaryResults.to_numpy(), biases)
 
         # step 8 :
 
