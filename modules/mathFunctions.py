@@ -17,7 +17,7 @@ def relu(Z) :
 
 
 def reluDerivative(Z) :
-    return (z > 0).astype(float)
+    return (Z > 0).astype(float)
 
 
 def softmax(Z):
@@ -34,6 +34,7 @@ def softmax(Z):
 def sigmoidDerivative(Z) :
     return sigmoid(Z) * (1 - sigmoid(Z))
     
+
 def binaryCrossEntropy(yPredicted, yTrueResults) :
     # yPredicted = np.array([[0.9, 0.2], [0.8, 0.4]])
     # yTrueResults = np.array([[1, 0], [1, 0]])
@@ -67,5 +68,5 @@ def bCrossEntrDerivBias() :
     pass
 
 
-def bCrossEntrDerivCoeff():
-    pass
+def bCrossEntrDerivative(yPredicted, yTrueResults):
+    

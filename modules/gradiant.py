@@ -14,10 +14,7 @@ lossMap = {
 }
 
 partialDerivativeMap = {
-    "binaryCrossEntropy" : {
-        "bias" : fct.bCrossEntrDerivBias, 
-        "coeff" : fct.bCrossEntrDerivCoeff
-    }
+    "binaryCrossEntropy" : fct.bCrossEntrDerivative
 }
 
 
@@ -29,6 +26,7 @@ def forwardPropagation(newWeights : list[np.ndarray], biases : list, batchData, 
         idAct = i + 1
         if i == 0 :
             inputValues = batchData
+            cacheA[f"l{i}"] = inputValues
         else :
             inputValues = cacheA[f"l{i}"]
         # print(i)
@@ -53,21 +51,26 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
     # errors calculations
     nLayer = len(activationByLayer)
     errorsByLayer = {}
+    deltas = []
     for layer in range(nLayer - 1, 0, -1) :
         # print(activationByLayer[nLayer - layer - 1])
         if layer == nLayer - 1 :
-            loss = lossMap[lossFct](caches["A"][f"l{layer}"], yRealResults)
+            deltas.append(partialDerivativeMap[lossFct])
         else : 
             lastErr = errorsByLayer[f"layer{layer + 1}"]
             loss = lastErr 
         errorsByLayer[f"layer{layer}"] = loss
-        print(errorsByLayer[f"layer{layer}"])
-        print(layer)
 
-    print(errorsByLayer)
-    weightGrd = 0
-    biasesGrd = 0
+
+    deltas = []
+
     # weights upd
-    # newWeights = weights - learningRate * ​∂L/​∂w SOIT = ​∂L/​∂ypred * ​∂pred/​∂z *​ ∂z/​∂w
+    newWeights = []
+    newBiases = []
+    # newWeights = weights - learningRate * ​∂L/​∂w SOIT = ​∂L/​∂ypred * ​∂pred/​∂z *​ ∂z/​∂w SOIT ​∂L/​∂ypred * ​∂pred/​∂z * 
+    for id, array in enumerate(weights) :
+        array = array - learningRate * deltas[id] * caches["A"][f"l{id}"]
+        biases[id] = biases - learningRate * deltas[id]
+        newWeights.append(array)
     # newBiases = biases - learningRate * biasesGrd
     return newWeights, newBiases
