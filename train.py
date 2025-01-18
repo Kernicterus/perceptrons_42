@@ -40,11 +40,12 @@ def launchTraining(weights : list[np.ndarray], model : dict, normalizedDatas : n
     activationByLayer = dst.getActivations(model)
     newWeights = weights
     for i in range(epochs):
+        print(f"epoch {i}")
         for j in range(0, len(normalizedDatas), batchSize) :
             batchData = np.transpose(normalizedDatas[j:j + batchSize])
-            cacheA, cacheZb = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
-            newWeights = grd.backwardPropagation(yRealResults, (cacheA, cacheZb), newWeights, activationByLayer)
-    return newWeights
+            caches = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
+            newWeights, biases = grd.backwardPropagation(yRealResults[:, j:j + batchSize], caches, newWeights, activationByLayer, lossFct, learningRate, biases)
+    return newWeights, biases
 
 
 def main() :
@@ -63,13 +64,13 @@ def main() :
         normalizedDatas, numDatasParams = dst.extractAndPrepareNumericalDatas(datas)
 
         # step 4 : extract and prepare the results : M=1, B=0
-        binaryResults = dst.targetBinarization(datas['f1'])
+        binaryResultsByClasses = dst.targetBinarization(datas['f1'])
 
         # step 5 : load the json network architecture
         model = dst.loadJson(sys.argv[2])
 
         # step 6 : build the weight matrices + initialization
-        weights = w.weightsInit(normalizedDatas, binaryResults, model)
+        weights = w.weightsInit(normalizedDatas, binaryResultsByClasses, model)
 
         # step 6b : prepare the bias
         biases = [np.full((weights[i].shape[0], 1), 0.001) for i in range(len(weights))]
@@ -77,7 +78,7 @@ def main() :
         # step 7 : gradiant descent
         normalizedDatasNp = normalizedDatas.to_numpy()
         dst.saveCsv("dataNormalized.csv", normalizedDatasNp)
-        weights = launchTraining(weights, model, normalizedDatasNp, binaryResults.to_numpy(), biases)
+        weights = launchTraining(weights, model, normalizedDatasNp, binaryResultsByClasses, biases)
 
         # step 8 :
 

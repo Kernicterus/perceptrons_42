@@ -13,7 +13,7 @@ def heNormal(weightsLayerShape : np.ndarray) :
 
 
 # Weights creation
-def nbNeuronsCalculation(stdDatas: pd.DataFrame, realResults : pd.Series, network : dict) -> list :
+def nbNeuronsCalculation(stdDatas: pd.DataFrame, realResults : list[np.ndarray], network : dict) -> list :
     nbNeurons = []
     nbNeurons.append(len(stdDatas.columns))
     i = 1
@@ -23,7 +23,7 @@ def nbNeuronsCalculation(stdDatas: pd.DataFrame, realResults : pd.Series, networ
         else :
             raise AssertionError(f"'neurons' missing in 'hidden_layer_{i}'")
         i += 1
-    nbNeurons.append(realResults.nunique())
+    nbNeurons.append(len(realResults))
     return nbNeurons
 
 
@@ -39,12 +39,12 @@ def getInitializations(network : dict) -> list:
     if "weights_init" in network[f"output_layer"] :
         initTypes.append(network[f"output_layer"]["weights_init"])
     else : 
-        initTypes.append(network["output_layer"]["weights_init"])
+        initTypes.append("default")
     return initTypes
     
 
 def getInitFunc(funcTitle : str) :
-    if funcTitle == "heUniform" :
+    if funcTitle == "heUniform" or funcTitle == "default" :
         return heUniform
     else :
         raise ValueError(f"no initialization called '{funcTitle}' found")

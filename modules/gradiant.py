@@ -1,72 +1,73 @@
 import numpy as np
 import pandas as pd
+import modules.mathFunctions as fct
 
-def sigmoid(z):
-    """
-    Function that calculates the sigmoid of a given value
-    alias g(z) and returns it
-    """    
-    return 1 / (1 + np.exp(-z))
-
-
-def relu(z) :
-    """
-    Function that calculates the RELU of a given vector z
-    and returns it
-    """   
-    return np.maximum(0, z)
-
-
-def softmax(z) :
-    """
-    Function that calculates the softmax of a given vector z
-    and returns it
-    """    
-    zMax = np.max(z)
-    zStable = z - zMax
-    exponentiation = np.exp(zStable)
-    sumExp = np.sum(exponentiation)
-    return exponentiation / sumExp
-
-
-def binaryCrossEntropy() :
-    pass
-    
 
 functionMap = {
-    "sigmoid" : sigmoid,
-    "relu" : relu,
-    "softmax" : softmax
+    "sigmoid" : fct.sigmoid,
+    "relu" : fct.relu,
+    "softmax" : fct.softmax
 }
 
 lossMap = {
-    "binaryCrossEntropy" : binaryCrossEntropy
+    "binaryCrossEntropy" : fct.binaryCrossEntropy
+}
+
+partialDerivativeMap = {
+    "binaryCrossEntropy" : {
+        "bias" : fct.bCrossEntrDerivBias, 
+        "coeff" : fct.bCrossEntrDerivCoeff
+    }
 }
 
 
-def forwardPropagation(newWeights : list[np.ndarray], biases : list, batchData, activationsByLayer : list) -> tuple:
-    cacheZ = {}
+def forwardPropagation(newWeights : list[np.ndarray], biases : list, batchData, activationsByLayer : list) -> dict[np.ndarray]:
     cacheZb = {}
     cacheA = {}
     for i in range(len(newWeights)) :
-        idZ = f"l{i}"
+        idZ = f"l{i + 1}"
+        idAct = i + 1
         if i == 0 :
             inputValues = batchData
         else :
-            inputValues = cacheA[f"l{i - 1}"]
+            inputValues = cacheA[f"l{i}"]
         # print(i)
-        # print(activationsByLayer[i])
+        # print(activationsByLayer[idAct])
         # print(f"layer {i} :shape weigths {newWeights[i].shape} - shape input {inputValues.shape}")
-        cacheZ[idZ] = np.dot(newWeights[i], inputValues)
-        # print (f"cache Z l{i} : {cacheZ[idZ]}")
-        cacheZb[idZ] = cacheZ[idZ] + biases[i]
+        cacheZb[idZ] = np.dot(newWeights[i], inputValues) + biases[i]
         # print (f"cache Z l{i} + bias : {cacheZb[idZ]}")
-        cacheA[f"l{i}"] = functionMap[activationsByLayer[i]](cacheZb[idZ])
-        # print (f"cache A {f"l{i}"}: {cacheA[f"l{i}"]}")
+        cacheA[idZ] = functionMap[activationsByLayer[idAct]](cacheZb[idZ])
+        # if activationsByLayer[idAct] == "softmax" :
+        #     print(f"cache Zb l{i+1} : {cacheZb[idZ]}")
+        #     print(f"cache A l{i+1} : {cacheA[f"l{i + 1}"]}")
+        caches = {
+            "Zb" : cacheZb,
+            "A" : cacheA
+        }
+    return caches
 
-    return cacheA, cacheZb
 
+def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], weights : list[np.ndarray],
+                        activationByLayer : list, lossFct, learningRate, biases) -> list[np.ndarray]:
+    
+    # errors calculations
+    nLayer = len(activationByLayer)
+    errorsByLayer = {}
+    for layer in range(nLayer - 1, 0, -1) :
+        # print(activationByLayer[nLayer - layer - 1])
+        if layer == nLayer - 1 :
+            loss = lossMap[lossFct](caches["A"][f"l{layer}"], yRealResults)
+        else : 
+            lastErr = errorsByLayer[f"layer{layer + 1}"]
+            loss = lastErr 
+        errorsByLayer[f"layer{layer}"] = loss
+        print(errorsByLayer[f"layer{layer}"])
+        print(layer)
 
-def backwardPropagation(yRealResults : np.ndarray, caches : tuple, newWeights : list[np.ndarray], activationByLayer : list) -> list[np.ndarray]:
-
-    return newWeights
+    print(errorsByLayer)
+    weightGrd = 0
+    biasesGrd = 0
+    # weights upd
+    # newWeights = weights - learningRate * ​∂L/​∂w SOIT = ​∂L/​∂ypred * ​∂pred/​∂z *​ ∂z/​∂w
+    # newBiases = biases - learningRate * biasesGrd
+    return newWeights, newBiases

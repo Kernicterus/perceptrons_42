@@ -1,7 +1,7 @@
 {
     "network_1": {
         "input_layer": {
-            "activation": "sigmoid"
+            "activation": "default"
         },
         "hidden_layer_1": {
             "neurons": 2,

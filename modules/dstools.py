@@ -124,13 +124,19 @@ def extractAndPrepareNumericalDatas(df : pd.DataFrame) -> tuple[pd.DataFrame, pd
     return numericalDf, parameters
 
 
-def targetBinarization(results: pd.Series) -> pd.Series :
+def targetBinarization(results: pd.Series) -> list[np.ndarray] :
     """
-    Function that binarize the results between 1 (='M') and 0 (='B')
-    Return the binarized results
-    """  
-    binaryResults = results.apply(lambda x: 1 if x == 'M' else 0)
-    return binaryResults
+    Function that binarize the results between 1 and 0  for each class (one vs all)
+    Return the binarized results for each class in a list of np array
+    The classes are sorted by alphanumerical order
+    """
+    arrayList = []
+    categories = pd.Categorical(results)
+    categories.sort_values()
+    for item in categories.categories :
+        arrayList.append(results.apply(lambda x : 1 if x == item else 0 ).to_numpy())
+    binaryResultsByClasses = np.vstack(arrayList)
+    return binaryResultsByClasses
 
 
 def getActivations(model : dict) :
