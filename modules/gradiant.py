@@ -14,8 +14,29 @@ lossMap = {
 }
 
 partialDerivativeMap = {
-    "binaryCrossEntropy" : fct.bCrossEntrDerivative
+    "binaryCrossEntropy" : fct.bCrossEntrDerivative,
+    "sigmoid" : fct.sigmoidDerivative,
+    "relu"    : fct.reluDerivative
+    # "softmax" : fct.softmaxDerivative,
 }
+
+def getDeltaOutputLayer(activation, loss, yRealResults, yPredicted) :
+    if (activation == "sigmoid" or activation == "softmax") and loss == "binaryCrossEntropy" :
+        print(yRealResults.shape)
+        print(yPredicted.shape)
+        return yPredicted - yRealResults
+    elif activation == "sigmoid" and loss == "mse" :
+        pass
+    elif activation == "softmax" and loss == "mse" :
+        pass
+    elif activation == "tanh" and loss == "binaryCrossEntropy" :
+        pass
+    elif activation == "tanh" and loss == "mse" :
+        pass
+    elif activation == "relu" and loss == "binaryCrossEntropy" :
+        pass
+    else :
+        raise ValueError("no activation/loss combination found")
 
 
 def forwardPropagation(newWeights : list[np.ndarray], biases : list, batchData, activationsByLayer : list) -> dict[np.ndarray]:
@@ -38,10 +59,10 @@ def forwardPropagation(newWeights : list[np.ndarray], biases : list, batchData, 
         # if activationsByLayer[idAct] == "softmax" :
         #     print(f"cache Zb l{i+1} : {cacheZb[idZ]}")
         #     print(f"cache A l{i+1} : {cacheA[f"l{i + 1}"]}")
-        caches = {
-            "Zb" : cacheZb,
-            "A" : cacheA
-        }
+    caches = {
+        "Zb" : cacheZb,
+        "A" : cacheA
+    }
     return caches
 
 
@@ -50,27 +71,25 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
     
     # errors calculations
     nLayer = len(activationByLayer)
-    errorsByLayer = {}
-    deltas = []
+    deltas = {}
     for layer in range(nLayer - 1, 0, -1) :
         # print(activationByLayer[nLayer - layer - 1])
         if layer == nLayer - 1 :
-            deltas.append(partialDerivativeMap[lossFct])
+            deltas[f"l{layer}"] = getDeltaOutputLayer(activationByLayer[layer], lossFct, yRealResults, caches["A"][f"l{layer}"])
         else : 
-            lastErr = errorsByLayer[f"layer{layer + 1}"]
-            loss = lastErr 
-        errorsByLayer[f"layer{layer}"] = loss
-
-
-    deltas = []
+            pass
+            # lastErr = errorsByLayer[f"layer{layer + 1}"]
+            # loss = lastErr 
+        # errorsByLayer[f"layer{layer}"] = loss
 
     # weights upd
     newWeights = []
     newBiases = []
     # newWeights = weights - learningRate * ​∂L/​∂w SOIT = ​∂L/​∂ypred * ​∂pred/​∂z *​ ∂z/​∂w SOIT ​∂L/​∂ypred * ​∂pred/​∂z * 
     for id, array in enumerate(weights) :
-        array = array - learningRate * deltas[id] * caches["A"][f"l{id}"]
-        biases[id] = biases - learningRate * deltas[id]
+        array = array - learningRate * deltas[f"l{id + 1}"] * caches["A"][f"l{id}"]
+        biases[id] = biases[id] - learningRate * deltas[f"l{id + 1}"]
         newWeights.append(array)
+        newBiases.append(biases[id])
     # newBiases = biases - learningRate * biasesGrd
     return newWeights, newBiases

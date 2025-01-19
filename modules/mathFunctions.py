@@ -69,4 +69,4 @@ def bCrossEntrDerivBias() :
 
 
 def bCrossEntrDerivative(yPredicted, yTrueResults):
-    
+    pass
