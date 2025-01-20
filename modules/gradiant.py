@@ -22,8 +22,6 @@ partialDerivativeMap = {
 
 def getDeltaOutputLayer(activation, loss, yRealResults, yPredicted) :
     if (activation == "sigmoid" or activation == "softmax") and loss == "binaryCrossEntropy" :
-        print(yRealResults.shape)
-        print(yPredicted.shape)
         return yPredicted - yRealResults
     elif activation == "sigmoid" and loss == "mse" :
         pass
@@ -76,7 +74,13 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
         # print(activationByLayer[nLayer - layer - 1])
         if layer == nLayer - 1 :
             deltas[f"l{layer}"] = getDeltaOutputLayer(activationByLayer[layer], lossFct, yRealResults, caches["A"][f"l{layer}"])
+            # print(f"delta layer l{layer} : {deltas[f"l{layer}"]}")
+            print(f"deltas l{layer} shape : {deltas[f'l{layer}'].shape}")
         else : 
+            print(f"weights id[{layer}] shape : {weights[layer].shape}") # attention les indexs des poids sont inférieurs de 1 aux indexs des layers
+            print(f"deltas l{layer + 1} shape : {deltas[f'l{layer + 1}'].shape}")
+            deltas[f"l{layer}"] = 46546
+            print(f"delta layer l{layer} : {deltas[f"l{layer}"]}")
             pass
             # lastErr = errorsByLayer[f"layer{layer + 1}"]
             # loss = lastErr 
@@ -86,7 +90,11 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
     newWeights = []
     newBiases = []
     # newWeights = weights - learningRate * ​∂L/​∂w SOIT = ​∂L/​∂ypred * ​∂pred/​∂z *​ ∂z/​∂w SOIT ​∂L/​∂ypred * ​∂pred/​∂z * 
+    print(f"len w array :{len(weights)}")
     for id, array in enumerate(weights) :
+        print(f"shape array : {array.shape}")
+        print(f"shape deltas[l{id + 1}] : {deltas[f'l{id + 1}'].shape}")
+        print(f"shape caches[A][l{id}] : {caches["A"][f"l{id}"].shape}")
         array = array - learningRate * deltas[f"l{id + 1}"] * caches["A"][f"l{id}"]
         biases[id] = biases[id] - learningRate * deltas[f"l{id + 1}"]
         newWeights.append(array)
