@@ -45,6 +45,11 @@ def launchTraining(weights : list[np.ndarray], model : dict, normalizedDatas : n
             batchData = np.transpose(normalizedDatas[j:j + batchSize])
             caches = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
             newWeights, biases = grd.backwardPropagation(yRealResults[:, j:j + batchSize], caches, newWeights, activationByLayer, lossFct, learningRate, biases)
+
+    # ------ TEST VALIDATION
+    caches = grd.forwardPropagation(newWeights, biases, np.transpose(normalizedDatas), activationByLayer)
+    print(caches["A"]["l5"])
+    
     return newWeights, biases
 
 
@@ -74,15 +79,15 @@ def main() :
 
         # step 6b : prepare the bias
         biases = [np.full((weights[i].shape[0], 1), 0.001) for i in range(len(weights))]
-
+        for item in biases:
+            print(item.shape)
         # step 7 : gradiant descent
         normalizedDatasNp = normalizedDatas.to_numpy()
         dst.saveCsv("dataNormalized.csv", normalizedDatasNp)
         weights = launchTraining(weights, model, normalizedDatasNp, binaryResultsByClasses, biases)
 
-        # step 8 :
+        # step 8 : save the weights and the parameters
 
-        # step 9 : save the weights and the parameters
     except Exception as e :
         print(f"Error : {e}")
         # raise Exception(f"Error : {e}")

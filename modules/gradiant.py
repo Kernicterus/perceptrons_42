@@ -50,10 +50,10 @@ def forwardPropagation(weights : list[np.ndarray], biases : list, batchData, act
             inputValues = cacheA[f"l{i}"]
         # print(i)
         # print(activationsByLayer[idAct])
-        print(f"layer {i} :shape weigths {weights[i].shape} - shape input {inputValues.shape}")
-        print(f"biases[i] shape = {biases[i].shape}")
+        # print(f"layer {i} :shape weigths {weights[i].shape} - shape input {inputValues.shape}")
+        # print(f"biases[i] shape = {biases[i].shape}")
         cacheZb[idZ] = np.dot(weights[i], inputValues) + biases[i]
-        print(cacheZb[idZ].shape)
+        # print(cacheZb[idZ].shape)
         # print (f"cache Z l{i} + bias : {cacheZb[idZ]}")
         cacheA[idZ] = functionMap[activationsByLayer[idAct]](cacheZb[idZ])
         # if activationsByLayer[idAct] == "softmax" :
@@ -74,21 +74,21 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
     nLayer = len(activationByLayer)
     deltas = {}
     for layer in range(nLayer - 1, 0, -1) :
-        print(layer)
+        # print(layer)
         if layer == nLayer - 1 :
             deltas[f"l{layer}"] = getDeltaOutputLayer(activationByLayer[layer], lossFct, yRealResults, caches["A"][f"l{layer}"])
             # print(f"delta layer l{layer} : {deltas[f"l{layer}"]}")
-            print(f"deltas l{layer} shape : {deltas[f'l{layer}'].shape}")
+            # print(f"deltas l{layer} shape : {deltas[f'l{layer}'].shape}")
         else : 
-            print(f"weights id[{layer}] shape : {weights[layer].shape}") # attention les indexs des poids sont inférieurs de 1 aux indexs des layers
-            print(f"deltas l{layer + 1} shape : {deltas[f'l{layer + 1}'].shape}")
-            print(f"activation fct : {activationByLayer[layer]}")
+            # print(f"weights id[{layer}] shape : {weights[layer].shape}") # attention les indexs des poids sont inférieurs de 1 aux indexs des layers
+            # print(f"deltas l{layer + 1} shape : {deltas[f'l{layer + 1}'].shape}")
+            # print(f"activation fct : {activationByLayer[layer]}")
             M = np.dot(np.transpose(weights[layer]), deltas[f"l{layer + 1}"])
-            print(f"M:{M}")
+            # print(f"M:{M}")
             deltas[f"l{layer}"] = (partialDerivativeMap[activationByLayer[layer]](caches["A"][f"l{layer}"])) * np.dot(np.transpose(weights[layer]), deltas[f"l{layer + 1}"])
             # print(f"delta layer l{layer} : {deltas[f"l{layer}"]}")
-            print(f"delta layer l{layer} shape : {deltas[f"l{layer}"].shape}")
-            print("----")
+            # print(f"delta layer l{layer} shape : {deltas[f"l{layer}"].shape}")
+            # print("----")
             # lastErr = errorsByLayer[f"layer{layer + 1}"]
             # loss = lastErr 
         # errorsByLayer[f"layer{layer}"] = loss
@@ -97,19 +97,17 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
     newWeights = []
     newBiases = []
     # newWeights = weights - learningRate * ​∂L/​∂w SOIT = ​∂L/​∂ypred * ​∂pred/​∂z *​ ∂z/​∂w SOIT ​∂L/​∂ypred * ​∂pred/​∂z * 
-    print(f"len w array :{len(weights)}")
+    # print(f"len w array :{len(weights)}")
     batchSize = len(yRealResults[0])
-    print(f"batchsize = {batchSize}")
+    # print(f"batchsize = {batchSize}")
 
     for id, array in enumerate(weights) :
-        print(f"shape array : {array.shape}")
-        print(f"shape deltas[l{id + 1}] : {deltas[f'l{id + 1}'].shape}")
-        print(f"shape caches[A][l{id}] : {caches["A"][f"l{id}"].shape}")
+        # print(f"shape array : {array.shape}")
+        # print(f"shape deltas[l{id + 1}] : {deltas[f'l{id + 1}'].shape}")
+        # print(f"shape caches[A][l{id}] : {caches["A"][f"l{id}"].shape}")
         deltaW = np.dot(deltas[f"l{id + 1}"], np.transpose(caches["A"][f"l{id}"])) /batchSize
         array = array - learningRate * deltaW
-        biases[id] = biases[id] - learningRate * deltas[f"l{id + 1}"]
+        biases[id] = biases[id] - learningRate / batchSize * np.sum(deltas[f"l{id + 1}"], axis=1, keepdims=True)
         newWeights.append(array)
         newBiases.append(biases[id])
-        print("-----")
-    # newBiases = biases - learningRate * biasesGrd
     return newWeights, newBiases
