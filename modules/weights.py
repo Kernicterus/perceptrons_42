@@ -55,7 +55,6 @@ def getInitFunc(funcTitle : str) :
 def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) -> dict[np.ndarray]:
     network = model[model["model_fit"]["network"]]
     neuronsByLayer = nbNeuronsCalculation(stdDatas, realResults, network)
-    print(f"neurons by layer : {neuronsByLayer}")
     initTypeByLayer = getInitializations(network)
     weights = {f"l{i}":np.zeros((neuronsByLayer[f"l{i}"], neuronsByLayer[f"l{i - 1}"])) for i in range(1, len(neuronsByLayer))}
     for id, key in enumerate(weights) :

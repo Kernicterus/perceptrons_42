@@ -70,16 +70,16 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
             deltas[f"l{layer}"] = getDeltaOutputLayer(activationByLayer[layer], lossFct, yRealResults, caches["A"][f"l{layer}"])
         else : 
             M = np.dot(np.transpose(weights[f"l{layer + 1}"]), deltas[f"l{layer + 1}"])
-            deltas[f"l{layer}"] = (partialDerivativeMap[activationByLayer[layer]](caches["A"][f"l{layer}"])) * np.dot(np.transpose(weights[f"{layer + 1}"]), deltas[f"l{layer + 1}"])
+            deltas[f"l{layer}"] = (partialDerivativeMap[activationByLayer[layer]](caches["A"][f"l{layer}"])) * np.dot(np.transpose(weights[f"l{layer + 1}"]), deltas[f"l{layer + 1}"])
 
     # weights upd
     newWeights = {}
     newBiases = []
     batchSize = len(yRealResults[0])
 
-    for id, array in enumerate(weights) :
+    for id, key in enumerate(weights) :
         deltaW = np.dot(deltas[f"l{id + 1}"], np.transpose(caches["A"][f"l{id}"])) /batchSize
-        array = array - learningRate * deltaW
+        array = weights[key] - learningRate * deltaW
         biases[id] = biases[id] - learningRate / batchSize * np.sum(deltas[f"l{id + 1}"], axis=1, keepdims=True)
         newWeights[f"l{id + 1}"] = (array)
         newBiases.append(biases[id])

@@ -79,8 +79,7 @@ def main() :
 
         # step 6b : prepare the bias
         biases = [np.full((weights[f"l{i + 1}"].shape[0], 1), 0.001) for i in range(len(weights))]
-        for item in biases:
-            print(item.shape)
+
         # step 7 : gradiant descent
         normalizedDatasNp = normalizedDatas.to_numpy()
         dst.saveCsv("dataNormalized.csv", normalizedDatasNp)
@@ -90,7 +89,7 @@ def main() :
 
     except Exception as e :
         print(f"Error : {e}")
-        raise Exception(f"Error : {e}")
+        # raise Exception(f"Error : {e}")
 
 
 if __name__ == "__main__" :
