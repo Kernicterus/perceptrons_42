@@ -7,6 +7,8 @@ CSV_NAME_TEST = "data_test.csv"
 
 def main() :
     try : 
+        if len(sys.argv) != 2 :
+            raise Exception("Usage : separate.py <dataset>")
         rawDatas = dst.loadCsvToNp(sys.argv[1])
         datasTest, datasTrain = dst.randomlySplitCsv(rawDatas)
         print(f"CSV {sys.argv[1]} successfully splitted in two parts")

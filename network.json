@@ -9,17 +9,17 @@
             "weights_init": "heUniform"
         },
         "hidden_layer_2": {
-            "neurons": 7,
+            "neurons": 10,
             "activation": "sigmoid",
             "weights_init": "heUniform"
         },
         "hidden_layer_3": {
-            "neurons": 6,
+            "neurons": 8,
             "activation": "sigmoid",
             "weights_init": "heUniform"
         },
         "hidden_layer_4": {
-            "neurons": 6,
+            "neurons": 8,
             "activation": "sigmoid",
             "weights_init": "heUniform"
         },
@@ -33,6 +33,6 @@
         "loss" : "binaryCrossEntropy",
         "learning_rate" : 0.08,
         "batch_size" : 32,
-        "epochs" : 100
+        "epochs" : 120
     }
 }

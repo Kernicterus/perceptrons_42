@@ -32,7 +32,7 @@ def checkArgs(args) -> bool :
     return True
 
 
-def launchTraining(weights : list[np.ndarray], model : dict, normalizedDatas : np.ndarray, yRealResults : np.ndarray, biases : list) -> list[np.ndarray]:
+def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : np.ndarray, yRealResults : np.ndarray, biases : list) -> dict[np.ndarray]:
     learningRate = model["model_fit"]["learning_rate"] 
     batchSize = model["model_fit"]["batch_size"] 
     epochs = model["model_fit"]["epochs"] 
@@ -78,7 +78,7 @@ def main() :
         weights = w.weightsInit(normalizedDatas, binaryResultsByClasses, model)
 
         # step 6b : prepare the bias
-        biases = [np.full((weights[i].shape[0], 1), 0.001) for i in range(len(weights))]
+        biases = [np.full((weights[f"l{i + 1}"].shape[0], 1), 0.001) for i in range(len(weights))]
         for item in biases:
             print(item.shape)
         # step 7 : gradiant descent
@@ -90,7 +90,7 @@ def main() :
 
     except Exception as e :
         print(f"Error : {e}")
-        # raise Exception(f"Error : {e}")
+        raise Exception(f"Error : {e}")
 
 
 if __name__ == "__main__" :
