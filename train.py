@@ -22,17 +22,20 @@ def fileCheck(file, extension) -> bool:
 
 
 def checkArgs(args) -> bool :
-    if len(args) != 3:
+    if len(args) != 4:
         print("Error: wrong number of arguments")
         return False
     if fileCheck(args[1], "csv") == False :
         return False
     if fileCheck(args[2], "json") == False :
         return False
+    if not sys.argv[3].isalnum():
+        print("Error: wrong output name, only alphanumeric characters allowed")
+        return False
     return True
 
 
-def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : np.ndarray, yRealResults : np.ndarray, biases : list) -> dict[np.ndarray]:
+def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : np.ndarray, yRealResults : np.ndarray, biases : dict) -> dict[np.ndarray]:
     learningRate = model["model_fit"]["learning_rate"] 
     batchSize = model["model_fit"]["batch_size"] 
     epochs = model["model_fit"]["epochs"] 
@@ -45,18 +48,16 @@ def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : n
             batchData = np.transpose(normalizedDatas[j:j + batchSize])
             caches = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
             newWeights, biases = grd.backwardPropagation(yRealResults[:, j:j + batchSize], caches, newWeights, activationByLayer, lossFct, learningRate, biases)
-
-    # ------ TEST VALIDATION
-    caches = grd.forwardPropagation(newWeights, biases, np.transpose(normalizedDatas), activationByLayer)
-    print(caches["A"]["l5"])
     
+    # caches = grd.forwardPropagation(newWeights, biases, np.transpose(normalizedDatas), activationByLayer)
+    # print(caches["A"]["l5"])
     return newWeights, biases
 
 
 def main() :
     try :
         if checkArgs(sys.argv) == False:
-            print("Usage : train.py <dataset.csv> <model.json>")
+            print("Usage : train.py <dataset.csv> <model.json> <json output name>")
             return 1
         
         # step 1 : load the dataset
@@ -67,7 +68,8 @@ def main() :
 
         # step 3 : extraction, numerization, filling missing values (MEDIAN) and  standardization of numerical datas
         normalizedDatas, numDatasParams = dst.extractAndPrepareNumericalDatas(datas)
-
+        print(type(numDatasParams))
+        print((numDatasParams))
         # step 4 : extract and prepare the results : M=1, B=0
         binaryResultsByClasses = dst.targetBinarization(datas['f1'])
 
@@ -78,14 +80,14 @@ def main() :
         weights = w.weightsInit(normalizedDatas, binaryResultsByClasses, model)
 
         # step 6b : prepare the bias
-        biases = [np.full((weights[f"l{i + 1}"].shape[0], 1), 0.001) for i in range(len(weights))]
+        biases = {f"l{i + 1}": np.full((weights[f"l{i + 1}"].shape[0], 1), 0.001) for i in range(len(weights))}
 
         # step 7 : gradiant descent
         normalizedDatasNp = normalizedDatas.to_numpy()
-        dst.saveCsv("dataNormalized.csv", normalizedDatasNp)
-        weights = launchTraining(weights, model, normalizedDatasNp, binaryResultsByClasses, biases)
+        weights, biases = launchTraining(weights, model, normalizedDatasNp, binaryResultsByClasses, biases)
 
         # step 8 : save the weights and the parameters
+        dst.saveTrainingParameters(sys.argv[3], model, weights, biases, numDatasParams)
 
     except Exception as e :
         print(f"Error : {e}")

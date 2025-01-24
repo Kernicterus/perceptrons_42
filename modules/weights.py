@@ -3,17 +3,36 @@ import pandas as pd
 
 # Initialization functions
 def heUniform(weightsLayerShape : np.ndarray) :
+    """
+    Function to initialize the weights of a layer with the He Unifrom initialization
+    Parameters :
+    - weightsLayerShape : shape of the weights
+    Return : np.ndarray containing the initialized weights
+    """
     interval = np.sqrt(6 / weightsLayerShape[1])
     return np.random.uniform(-interval, interval, weightsLayerShape)
 
 
 def heNormal(weightsLayerShape : np.ndarray) :
+    """
+    Function to initialize the weights of a layer with the He Normal initialization
+    Parameters :
+    - weightsLayerShape : shape of the weights
+    Return : np.ndarray containing the initialized weights
+    """
     std = np.sqrt(2 / weightsLayerShape[1])
     return np.random.normal(0, std, weightsLayerShape)
 
 
 # Weights creation
-def nbNeuronsCalculation(stdDatas: pd.DataFrame, realResults : list[np.ndarray], network : dict) -> dict :
+def nbNeuronsCalculation(stdDatas: pd.DataFrame, outputLayerLen : int, network : dict) -> dict :
+    """
+    Function to calculate the number of neurons in each layer
+    Parameters :
+    - stdDatas : the standardized datas
+    - outputLayerLen : the number of neurons in the output layer
+    - network : the network architecture
+    """
     nbNeurons = {}
     nbNeurons["l0"] = (len(stdDatas.columns))
     i = 1
@@ -23,11 +42,17 @@ def nbNeuronsCalculation(stdDatas: pd.DataFrame, realResults : list[np.ndarray],
         else :
             raise AssertionError(f"'neurons' missing in 'hidden_layer_{i}'")
         i += 1
-    nbNeurons[f"l{i}"] = (len(realResults))
+    nbNeurons[f"l{i}"] = outputLayerLen
     return nbNeurons
 
 
 def getInitializations(network : dict) -> list:
+    """
+    Function to get the initialization functions for each layer
+    Parameters :
+    - network : the network architecture
+    Return : list of initialization functions
+    """
     initTypes = []
     i = 1
     while f"hidden_layer_{i}" in network:
@@ -44,6 +69,12 @@ def getInitializations(network : dict) -> list:
     
 
 def getInitFunc(funcTitle : str) :
+    """
+    Function to get the initialization function of the weights of a layer
+    Parameters :
+    - funcTitle : the title of the function
+    Return : the function
+    """
     if funcTitle == "heUniform" or funcTitle == "default" :
         return heUniform
     elif funcTitle == "heNormal" :
@@ -53,8 +84,16 @@ def getInitFunc(funcTitle : str) :
     
 
 def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) -> dict[np.ndarray]:
+    """
+    Function to initialize the weights of the network by using the proper initialization function of each layer
+    Parameters :
+    - stdDatas : the standardized datas
+    - realResults : the real results
+    - model : the model architecture
+    Return : the weights initialized
+    """
     network = model[model["model_fit"]["network"]]
-    neuronsByLayer = nbNeuronsCalculation(stdDatas, realResults, network)
+    neuronsByLayer = nbNeuronsCalculation(stdDatas, len(realResults), network)
     initTypeByLayer = getInitializations(network)
     weights = {f"l{i}":np.zeros((neuronsByLayer[f"l{i}"], neuronsByLayer[f"l{i - 1}"])) for i in range(1, len(neuronsByLayer))}
     for id, key in enumerate(weights) :

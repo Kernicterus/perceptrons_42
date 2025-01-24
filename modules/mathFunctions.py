@@ -36,9 +36,20 @@ def sigmoidDerivative(Z) :
     
 
 def binaryCrossEntropy(yPredicted, yTrueResults) :
-    # yPredicted = np.array([[0.9, 0.2], [0.8, 0.4]])
-    # yTrueResults = np.array([[1, 0], [1, 0]])
-    # result : 0.5312
+    """
+    Computes the binary cross-entropy loss between predicted and true binary labels.
+    Parameters:
+        - yPredicted (numpy.ndarray): The predicted probabilities for each class, with values in the range (0, 1).
+        - yTrueResults (numpy.ndarray): The true binary labels, with values of either 0 or 1.
+    Returns:
+        - float: The binary cross-entropy loss.
+    Raises:
+        - ValueError: If yPredicted and yTrueResults do not have the same shape.
+        - ValueError: If yTrueResults contains values other than 0 or 1.
+    Notes:
+        - The function clips the predicted probabilities to avoid log(0) errors.
+        - The binary cross-entropy loss is computed as the negative average of the log probabilities.
+    """
 
     if yPredicted.shape != yTrueResults.shape :
         raise ValueError("yPredicted and yResults does not have the same size")
@@ -56,10 +67,6 @@ def binaryCrossEntropy(yPredicted, yTrueResults) :
         array.append(errorEntry)
 
 
-    # array = [np.log(yPredicted[x, i]) if yTrueResults[x, i] == 1 else np.log(1 - yPredicted[x, i])
-    # for x in range(yPredicted.shape[0])
-    # for i in range(yPredicted.shape[1])]
-    # lossBatch = - np.mean(yTrueResults * np.log(yPredicted) + (1 - yTrueResults) * np.log(1 - yPredicted))
     lossBatch = - 1 / m * np.sum(array)
     return lossBatch
     

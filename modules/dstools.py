@@ -49,6 +49,28 @@ network, loss, learning_rate, batch_size, epochs")
         raise AssertionError(f"loading json : {e}")
     return data
 
+def saveTrainingParameters(outputName : str, model : dict, weights : dict,
+                           biases : dict, dataParameters : pd.DataFrame) :
+    """
+    Function to save the training parameters in a json file
+    Parameters : 
+    - path of the new file
+    - the model
+    - the weights
+    - the biases
+    - the data parameters (mean, std, median)
+    """
+    try : 
+        with open(f"{outputName}.json", "w") as file:
+            json.dump({
+            "model": model,
+            "weights": {key: value.tolist() for key, value in weights.items()},
+            "biases": {key: value.tolist() for key, value in biases.items()},
+            "dataParameters": dataParameters.to_json(indent=4)
+            }, file, indent=4)
+
+    except Exception as e :
+        raise Exception(e)
 
 def saveCsv(outputName : str, datas : np.ndarray) :
     """
@@ -139,7 +161,17 @@ def targetBinarization(results: pd.Series) -> list[np.ndarray] :
     return binaryResultsByClasses
 
 
-def getActivations(model : dict) :
+def getActivations(model : dict) -> list :
+    """
+    Extracts the activation functions from each layer in a given model.
+    Args:
+        model (dict): A dictionary representing the model.
+    Returns:
+        list: A list of activation functions used in the model layers.
+    Raises:
+        ValueError: If any layer is missing the "activation" key in its configuration.
+    """
+
     layers = model[model["model_fit"]["network"]]
     activations = []
     for layer, layerConfig in layers.items():
