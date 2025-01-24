@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import json
+import os
 
 
 def loadCsvToNp(path : str) -> np.ndarray :
@@ -30,7 +31,7 @@ def loadCsvToDf(path: str) -> pd.DataFrame:
     return csv
 
 
-def loadJson(path : str) -> dict:
+def loadParseJsonNetwork(path : str) -> dict:
     """
     Function to load a json and returns it
     """
@@ -49,8 +50,23 @@ network, loss, learning_rate, batch_size, epochs")
         raise AssertionError(f"loading json : {e}")
     return data
 
-def saveTrainingParameters(outputName : str, model : dict, weights : dict,
-                           biases : dict, dataParameters : pd.DataFrame) :
+
+def getNetworkArchitecture(model : dict, inputsNb : int, outputsNb) -> dict:
+    """
+    Function to get the network architecture from the model
+    Parameters : 
+    - the model
+    Return : the network architecture
+    """
+    network = model[model["model_fit"]["network"]]
+    network["input_layer"]["neurons"] = inputsNb
+    network["output_layer"]["neurons"] = outputsNb
+    for key in network :
+        network[key].pop("weights_init", None)
+    return network
+
+def saveTrainingParameters(outputName : str, model : dict, weights : dict, biases : dict,
+                           dataParameters : pd.DataFrame, targetColumnName : str, targetClasses : pd.Categorical) :
     """
     Function to save the training parameters in a json file
     Parameters : 
@@ -61,12 +77,16 @@ def saveTrainingParameters(outputName : str, model : dict, weights : dict,
     - the data parameters (mean, std, median)
     """
     try : 
+        lastLayer = len(weights)
+        network = getNetworkArchitecture(model, weights["l1"].shape[1], weights[f"l{lastLayer}"].shape[0])
         with open(f"{outputName}.json", "w") as file:
             json.dump({
-            "model": model,
+            "network": network,
             "weights": {key: value.tolist() for key, value in weights.items()},
             "biases": {key: value.tolist() for key, value in biases.items()},
-            "dataParameters": dataParameters.to_json(indent=4)
+            "dataParameters": dataParameters.to_dict(),
+            "targetColumnName": targetColumnName,
+            "targetClasses": targetClasses.tolist()
             }, file, indent=4)
 
     except Exception as e :
@@ -158,10 +178,10 @@ def targetBinarization(results: pd.Series) -> list[np.ndarray] :
     for item in categories.categories :
         arrayList.append(results.apply(lambda x : 1 if x == item else 0 ).to_numpy())
     binaryResultsByClasses = np.vstack(arrayList)
-    return binaryResultsByClasses
+    return binaryResultsByClasses, categories.categories
 
 
-def getActivations(model : dict) -> list :
+def getActivations(network : dict) -> list :
     """
     Extracts the activation functions from each layer in a given model.
     Args:
@@ -172,7 +192,7 @@ def getActivations(model : dict) -> list :
         ValueError: If any layer is missing the "activation" key in its configuration.
     """
 
-    layers = model[model["model_fit"]["network"]]
+    layers = network
     activations = []
     for layer, layerConfig in layers.items():
                 if "activation" in layerConfig:
@@ -180,3 +200,18 @@ def getActivations(model : dict) -> list :
                 else:
                     raise ValueError(f"The layer '{layer}' is missing the 'activation' key.")
     return activations
+
+def fileCheck(file, extension) -> bool:
+    if file.split('.')[-1] != extension:
+        print(f"Error: wrong {file} : not {extension} extension")
+        return False
+    if not os.path.exists(file):
+        print(f"Error: {file} not found")
+        return False
+    if not open(file, 'r').readable():
+        print(f"Error: {file} not readable")
+        return False
+    if open(file, 'r').read() == "":
+        print("Error: empty file")
+        return False
+    return True

@@ -3,31 +3,15 @@ import modules.weights as w
 import modules.gradiant as grd
 import numpy as np
 import sys
-import os
-
-def fileCheck(file, extension) -> bool:
-    if file.split('.')[-1] != extension:
-        print(f"Error: wrong {file} : not {extension} extension")
-        return False
-    if not os.path.exists(file):
-        print(f"Error: {file} not found")
-        return False
-    if not open(file, 'r').readable():
-        print(f"Error: {file} not readable")
-        return False
-    if open(file, 'r').read() == "":
-        print("Error: empty file")
-        return False
-    return True
 
 
 def checkArgs(args) -> bool :
-    if len(args) != 4:
+    if len(args) != 5:
         print("Error: wrong number of arguments")
         return False
-    if fileCheck(args[1], "csv") == False :
+    if dst.fileCheck(args[1], "csv") == False :
         return False
-    if fileCheck(args[2], "json") == False :
+    if dst.fileCheck(args[2], "json") == False :
         return False
     if not sys.argv[3].isalnum():
         print("Error: wrong output name, only alphanumeric characters allowed")
@@ -40,7 +24,7 @@ def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : n
     batchSize = model["model_fit"]["batch_size"] 
     epochs = model["model_fit"]["epochs"] 
     lossFct = model["model_fit"]["loss"]
-    activationByLayer = dst.getActivations(model)
+    activationByLayer = dst.getActivations(model[model["model_fit"]["network"]])
     newWeights = weights
     for i in range(epochs):
         print(f"epoch {i}")
@@ -57,24 +41,26 @@ def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : n
 def main() :
     try :
         if checkArgs(sys.argv) == False:
-            print("Usage : train.py <dataset.csv> <model.json> <json output name>")
+            print("Usage : train.py <dataset.csv> <model.json> <json output name> <target column name>")
             return 1
         
         # step 1 : load the dataset
         rawDatas = dst.loadCsvToDf(sys.argv[1])
-
+        if not sys.argv[4] in rawDatas.columns :
+            raise AssertionError(f"target column '{sys.argv[4]}' not found in the dataset")
+        targetColumnName = sys.argv[4]
+        
         # step 2 : drop the rows with missing values in target column and delete index column
         datas = dst.prepareCsv(rawDatas)
 
         # step 3 : extraction, numerization, filling missing values (MEDIAN) and  standardization of numerical datas
         normalizedDatas, numDatasParams = dst.extractAndPrepareNumericalDatas(datas)
-        print(type(numDatasParams))
-        print((numDatasParams))
+
         # step 4 : extract and prepare the results : M=1, B=0
-        binaryResultsByClasses = dst.targetBinarization(datas['f1'])
+        binaryResultsByClasses, targetClasses = dst.targetBinarization(datas[targetColumnName])
 
         # step 5 : load the json network architecture
-        model = dst.loadJson(sys.argv[2])
+        model = dst.loadParseJsonNetwork(sys.argv[2])
 
         # step 6 : build the weight matrices + initialization
         weights = w.weightsInit(normalizedDatas, binaryResultsByClasses, model)
@@ -87,7 +73,7 @@ def main() :
         weights, biases = launchTraining(weights, model, normalizedDatasNp, binaryResultsByClasses, biases)
 
         # step 8 : save the weights and the parameters
-        dst.saveTrainingParameters(sys.argv[3], model, weights, biases, numDatasParams)
+        dst.saveTrainingParameters(sys.argv[3], model, weights, biases, numDatasParams, targetColumnName, targetClasses)
 
     except Exception as e :
         print(f"Error : {e}")
