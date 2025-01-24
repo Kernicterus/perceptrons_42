@@ -138,7 +138,7 @@ def main() :
 
     except Exception as e :
         print(f"Error : {e}")
-        raise Exception(f"Error : {e}")
+        # raise Exception(f"Error : {e}")
 
 if __name__ == "__main__" :
     main()

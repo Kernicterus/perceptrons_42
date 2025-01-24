@@ -67,7 +67,10 @@ def forwardPropagation(weights : dict[np.ndarray], biases : dict, batchData, act
         else :
             inputValues = cacheA[f"l{i}"]
         cacheZb[idZ] = np.dot(weights[f"l{i + 1}"], inputValues) + biases[f"l{i + 1}"]
-        cacheA[idZ] = functionMap[activationsByLayer[idAct]](cacheZb[idZ])
+        try :
+            cacheA[idZ] = functionMap[activationsByLayer[idAct]](cacheZb[idZ])
+        except KeyError :
+            raise ValueError(f"activation function '{activationsByLayer[idAct]}' not found")
 
     caches = {
         "Zb" : cacheZb,
