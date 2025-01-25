@@ -7,7 +7,8 @@ functionMap = {
     "sigmoid" : fct.sigmoid,
     "relu" : fct.relu,
     "softmax" : fct.softmax,
-    "leakyRelu" : fct.leakyRelu
+    "leakyRelu" : fct.leakyRelu,
+    "tanh" : fct.tanh
 }
 
 lossMap = {
@@ -19,6 +20,7 @@ partialDerivativeMap = {
     "sigmoid" : fct.sigmoidDerivative,
     "relu"    : fct.reluDerivative,
     "leakyRelu" : fct.leakyReluDerivative,
+    "tanh" : fct.tanhDerivative
 }
 
 def getDeltaOutputLayer(activation, loss, yRealResults, yPredicted) :

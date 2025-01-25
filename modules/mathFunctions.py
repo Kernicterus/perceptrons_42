@@ -14,7 +14,7 @@ def tanh(Z):
     return np.tanh(Z)
 
 
-def tanh_derivative(Z):
+def tanhDerivative(Z):
     return 1 - np.tanh(Z) ** 2
 
 
