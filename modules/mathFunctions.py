@@ -50,7 +50,7 @@ def binaryCrossEntropy(yPredicted, yTrueResults) :
         - The function clips the predicted probabilities to avoid log(0) errors.
         - The binary cross-entropy loss is computed as the negative average of the log probabilities.
     """
-
+    
     if yPredicted.shape != yTrueResults.shape :
         raise ValueError("yPredicted and yResults does not have the same size")
     if not np.all((yTrueResults == 0) | (yTrueResults == 1)):
@@ -59,16 +59,8 @@ def binaryCrossEntropy(yPredicted, yTrueResults) :
     yPredicted = np.clip(yPredicted, epsilon, 1 - epsilon)
     m = len(yPredicted)
 
-    array = []
-    for entry in range(yPredicted.shape[1]) :
-        errorEntry = 0
-        for k in range(yPredicted.shape[0]) :
-            errorEntry += (np.log(yPredicted[k, entry]) if yTrueResults[k, entry] == 1 else np.log(1 - yPredicted[k, entry]))
-        array.append(errorEntry)
-
-
-    lossBatch = - 1 / m * np.sum(array)
-    return lossBatch
+    loss = -1 / m * np.sum(yTrueResults * np.log(yPredicted) + (1 - yTrueResults) * np.log(1 - yPredicted))
+    return loss
     
 
 def bCrossEntrDerivBias() :

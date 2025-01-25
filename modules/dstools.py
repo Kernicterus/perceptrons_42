@@ -124,15 +124,15 @@ def randomlySplitCsv(datas : np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return part1, part2
 
 
-def prepareCsv(rawDatas : pd.DataFrame) -> pd.DataFrame :
+def prepareCsv(rawDatas : pd.DataFrame, targetColumn : str) -> pd.DataFrame :
     """
     Function to clean the dataset by deleting the index column and deleting rows with missing target
     Parameters : a pd.DataFrame object
     Return : a new pd.DataFrame containing the cleaned datas
     """ 
     datas = rawDatas.drop(columns="f0")
-    datas["f1"] = datas["f1"].replace('', pd.NA)
-    datasWithoutEmpty = datas.dropna(subset=['f1'])
+    datas[targetColumn] = datas[targetColumn].replace('', pd.NA)
+    datasWithoutEmpty = datas.dropna(subset=[targetColumn])
     return datasWithoutEmpty
 
 

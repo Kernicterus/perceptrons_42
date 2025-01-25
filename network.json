@@ -31,8 +31,8 @@
     "model_fit" : {
         "network" : "network_1",
         "loss" : "binaryCrossEntropy",
-        "learning_rate" : 0.08,
+        "learning_rate" : 0.1,
         "batch_size" : 32,
-        "epochs" : 120
+        "epochs" : 200
     }
 }
