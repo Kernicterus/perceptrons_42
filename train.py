@@ -28,12 +28,25 @@ def graphManager(graphDatas : np.ndarray) :
     epochs = range(1, len(graphDatas) + 1)
     losses = graphDatas[:, 0]
     valLosses = graphDatas[:, 1]
-    plt.title("Loss evolution (BCE function)")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.plot(epochs, losses, color='red', linestyle='-', label='train')
-    plt.plot(epochs, valLosses, color = 'blue', linestyle=':', label='validation')
-    plt.legend()
+    accuracies = graphDatas[:, 2]
+    accuraciesVal = graphDatas[:, 3]
+
+    fig, axes = plt.subplots(2, 1, figsize=(10, 10))
+    axes[0].plot(epochs, losses, color='blue', linestyle='-', label='train')
+    axes[0].plot(epochs, valLosses, color = 'orange', linestyle=':', label='validation')
+    axes[0].set_title("Loss evolution (BCE function)")
+    axes[0].set_xlabel("Epochs")
+    axes[0].set_ylabel("Loss")
+    axes[0].legend()
+
+    axes[1].plot(epochs, accuracies, color='blue', linestyle='-', label='accuracy')
+    axes[1].plot(epochs, accuraciesVal, color = 'orange', linestyle=':', label='validation accuracy')
+    axes[1].set_title("Accuracy evolution")
+    axes[1].set_xlabel("Epochs")
+    axes[1].set_ylabel("Accuracy")
+    axes[1].legend()
+
+    plt.tight_layout()
     plt.savefig("loss.png")
     # plt.show()
 
@@ -46,7 +59,7 @@ def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : n
     activationByLayer = dst.getActivations(model[model["model_fit"]["network"]])
     newWeights = weights
     yPredicted = np.zeros(yRealResults.shape)
-    graphDatas = np.zeros((epochs, 2))
+    graphDatas = np.zeros((epochs, 4))
     for i in range(1, epochs + 1):
         for j in range(0, len(normalizedDatas), batchSize) :
             batchData = np.transpose(normalizedDatas[j:j + batchSize])
@@ -60,7 +73,10 @@ def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : n
             yPredictedVal = cachesVal["A"][f"l{len(newWeights)}"]
             valLoss = mf.binaryCrossEntropy(yPredictedVal[0], yRealResultsVal[0])
             print(f"epoch {i}/{epochs} - loss : {loss:.4f} - val_loss : {valLoss:.4f}")
-            graphDatas[i - 1] = [loss, valLoss]
+            accuracy = np.mean((yPredicted[0] > 0.5) == yRealResults[0])
+            accuracyVal = np.mean((yPredictedVal[0] > 0.5) == yRealResultsVal[0])
+            graphDatas[i - 1] = [loss, valLoss, accuracy, accuracyVal]
+            print(f"    accuracy : {accuracy:.4f} - val_accuracy : {accuracyVal:.4f}")
         else :
             raise AssertionError("Only binary classification is supported")
     return newWeights, biases, graphDatas

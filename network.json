@@ -4,22 +4,22 @@
             "activation": "default"
         },
         "hidden_layer_1": {
-            "neurons": 20,
+            "neurons": 30,
             "activation": "sigmoid",
             "weights_init": "heUniform"
         },
         "hidden_layer_2": {
-            "neurons": 10,
+            "neurons": 20,
             "activation": "sigmoid",
             "weights_init": "heUniform"
         },
         "hidden_layer_3": {
-            "neurons": 8,
+            "neurons": 10,
             "activation": "sigmoid",
             "weights_init": "heUniform"
         },
         "hidden_layer_4": {
-            "neurons": 8,
+            "neurons": 10,
             "activation": "sigmoid",
             "weights_init": "heUniform"
         },
@@ -32,7 +32,7 @@
         "network" : "network_1",
         "loss" : "binaryCrossEntropy",
         "learning_rate" : 0.1,
-        "batch_size" : 32,
+        "batch_size" : 16,
         "epochs" : 200
     }
 }
