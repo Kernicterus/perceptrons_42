@@ -83,7 +83,7 @@ def getInitFunc(funcTitle : str) :
         raise ValueError(f"no initialization called '{funcTitle}' found")
     
 
-def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) -> dict[np.ndarray]:
+def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, network : dict) -> dict[np.ndarray]:
     """
     Function to initialize the weights of the network by using the proper initialization function of each layer
     Parameters :
@@ -92,7 +92,7 @@ def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, model : dict) 
     - model : the model architecture
     Return : the weights initialized
     """
-    network = model[model["model_fit"]["network"]]
+
     neuronsByLayer = nbNeuronsCalculation(stdDatas, len(realResults), network)
     initTypeByLayer = getInitializations(network)
     weights = {f"l{i}":np.zeros((neuronsByLayer[f"l{i}"], neuronsByLayer[f"l{i - 1}"])) for i in range(1, len(neuronsByLayer))}
