@@ -96,7 +96,11 @@ A network is defined by several layers:
   - `activation`: Activation function (e.g., "softmax").
   - `weights_init`: Weight initialization method.
 
-**Note:** The number of hidden layers is unlimited and they must be named according to the convention `hidden_layer_1`, `hidden_layer_2`, etc.
+**Note:** 
+1. The number of hidden layers is unlimited and they must be named according to the convention `hidden_layer_1`, `hidden_layer_2`, etc.
+2. The different activations possible are : 
+"sigmoid", "relu", "tanh", "leakyRelu"
+3. Softmax activation only possible for the output layer
 
 #### 2. Training Parameters (`model_fit`)
 

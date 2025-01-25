@@ -6,7 +6,8 @@ import modules.mathFunctions as fct
 functionMap = {
     "sigmoid" : fct.sigmoid,
     "relu" : fct.relu,
-    "softmax" : fct.softmax
+    "softmax" : fct.softmax,
+    "leakyRelu" : fct.leakyRelu
 }
 
 lossMap = {
@@ -16,8 +17,8 @@ lossMap = {
 partialDerivativeMap = {
     "binaryCrossEntropy" : fct.bCrossEntrDerivative,
     "sigmoid" : fct.sigmoidDerivative,
-    "relu"    : fct.reluDerivative
-    # "softmax" : fct.softmaxDerivative,
+    "relu"    : fct.reluDerivative,
+    "leakyRelu" : fct.leakyReluDerivative,
 }
 
 def getDeltaOutputLayer(activation, loss, yRealResults, yPredicted) :

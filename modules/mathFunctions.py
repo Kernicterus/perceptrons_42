@@ -1,11 +1,33 @@
 import numpy as np
 
+ALPHA = 0.01
+
+def leakyRelu(Z):
+    return np.where(Z > 0, Z, ALPHA * Z)
+
+
+def leakyReluDerivative(Z):
+    return np.where(Z > 0, 1, ALPHA)
+
+
+def tanh(Z):
+    return np.tanh(Z)
+
+
+def tanh_derivative(Z):
+    return 1 - np.tanh(Z) ** 2
+
+
 def sigmoid(Z):
     """
     Function that calculates the sigmoid of a given value
     alias g(z) and returns it
     """    
     return 1 / (1 + np.exp(-Z))
+
+
+def sigmoidDerivative(Z) :
+    return sigmoid(Z) * (1 - sigmoid(Z))
 
 
 def relu(Z) :
@@ -28,12 +50,8 @@ def softmax(Z):
     zStable = Z - zMax
     exponentiation = np.exp(zStable)
     sumExp = np.sum(exponentiation, axis=0, keepdims=True)
-    return exponentiation / sumExp
+    return exponentiation / sumExp  
 
-
-def sigmoidDerivative(Z) :
-    return sigmoid(Z) * (1 - sigmoid(Z))
-    
 
 def binaryCrossEntropy(yPredicted, yTrueResults) :
     """

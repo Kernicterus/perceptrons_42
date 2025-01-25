@@ -4,6 +4,35 @@
             "activation": "default"
         },
         "hidden_layer_1": {
+            "neurons": 28,
+            "activation": "relu",
+            "weights_init": "heUniform"
+        },
+        "hidden_layer_2": {
+            "neurons": 15,
+            "activation": "relu",
+            "weights_init": "heUniform"
+        },
+        "hidden_layer_3": {
+            "neurons": 9,
+            "activation": "relu",
+            "weights_init": "heUniform"
+        },
+        "hidden_layer_4": {
+            "neurons": 5,
+            "activation": "relu",
+            "weights_init": "heUniform"
+        },
+        "output_layer": {
+            "activation" : "softmax",
+            "weights_init" : "heUniform"
+        }
+    },
+    "network_2": {
+        "input_layer": {
+            "activation": "default"
+        },
+        "hidden_layer_1": {
             "neurons": 30,
             "activation": "sigmoid",
             "weights_init": "heUniform"
@@ -29,10 +58,11 @@
         }
     },
     "model_fit" : {
-        "network" : "network_1",
+        "network" : "network_2",
         "loss" : "binaryCrossEntropy",
         "learning_rate" : 0.1,
         "batch_size" : 16,
-        "epochs" : 200
+        "epochs" : 180
     }
 }
+
