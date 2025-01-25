@@ -117,7 +117,7 @@ def main() :
         weights, biases, graphDatas = launchTraining(weights, biases, model, datasForTraining)
 
         # step 8 : save the weights and the parameters
-        dst.saveTrainingParameters(sys.argv[3], model, weights, biases, numDatasParams, sys.argv[5], targetClasses)
+        dst.saveTrainingParameters(sys.argv[4], model, weights, biases, numDatasParams, sys.argv[5], targetClasses)
         print(f"Training ended successfully - model saved as {sys.argv[4]}.json")
 
         # step 9 : graph
