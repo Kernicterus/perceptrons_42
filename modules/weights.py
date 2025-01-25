@@ -25,7 +25,7 @@ def heNormal(weightsLayerShape : np.ndarray) :
 
 
 # Weights creation
-def nbNeuronsCalculation(stdDatas: pd.DataFrame, outputLayerLen : int, network : dict) -> dict :
+def nbNeuronsCalculation(stdDatas: np.ndarray, outputLayerLen : int, network : dict) -> dict :
     """
     Function to calculate the number of neurons in each layer
     Parameters :
@@ -34,7 +34,7 @@ def nbNeuronsCalculation(stdDatas: pd.DataFrame, outputLayerLen : int, network :
     - network : the network architecture
     """
     nbNeurons = {}
-    nbNeurons["l0"] = (len(stdDatas.columns))
+    nbNeurons["l0"] = stdDatas.shape[1]
     i = 1
     while f"hidden_layer_{i}" in network:
         if "neurons" in network[f"hidden_layer_{i}"] :
@@ -83,13 +83,13 @@ def getInitFunc(funcTitle : str) :
         raise ValueError(f"no initialization called '{funcTitle}' found")
     
 
-def weightsInit(stdDatas : pd.DataFrame, realResults : pd.Series, network : dict) -> dict[np.ndarray]:
+def weightsInit(stdDatas : np.ndarray, realResults : pd.Series, network : dict) -> dict[np.ndarray]:
     """
     Function to initialize the weights of the network by using the proper initialization function of each layer
     Parameters :
     - stdDatas : the standardized datas
     - realResults : the real results
-    - model : the model architecture
+    - network : the network architecture
     Return : the weights initialized
     """
 

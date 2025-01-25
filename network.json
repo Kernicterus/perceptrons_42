@@ -154,11 +154,11 @@
         }
     },
     "model_fit" : {
-        "network" : "network_relu_heU_little",
+        "network" : "network_sigm_heN",
         "loss" : "binaryCrossEntropy",
         "learning_rate" : 0.01,
         "batch_size" : 14,
-        "epochs" : 70
+        "epochs" : 150
     }
 }
 

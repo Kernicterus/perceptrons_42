@@ -22,7 +22,8 @@ def sigmoid(Z):
     """
     Function that calculates the sigmoid of a given value
     alias g(z) and returns it
-    """    
+    """   
+    Z = np.clip(Z, -500, 500)
     return 1 / (1 + np.exp(-Z))
 
 

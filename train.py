@@ -9,6 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 BETA = 0.9
+PATIENCE = 10
 
 def checkArgs(args) -> bool :
     if len(args) != 6:
@@ -63,13 +64,20 @@ def launchTraining(weights : dict, biases : dict, model : dict, datas : dict) :
     newWeights = weights.copy()
     yPredicted = np.zeros(datas["yRealResultsTrain"].shape)
     graphDatas = np.zeros((epochs, 4))
+    recordedWeights = []
+    recordedBiases = []
 
     if datas["yRealResultsTrain"].shape[0] != 2:
         raise AssertionError("Only binary classification is supported")
 
+    recordedWeights.append(newWeights)
+    recordedBiases.append(biases)
+    # for Nesterov Accelerated Gradient
     vW = {key: np.zeros_like(weights[key]) for key in weights}
     vB = {key: np.zeros_like(biases[key]) for key in biases}
-
+    # ----
+    patience = PATIENCE
+    iMax = 0  
     for i in range(1, epochs + 1):
         for j in range(0, len(datas["normalizedDatas"]), batchSize) :
             aWeights = {key: newWeights[key] - BETA * vW[key] for key in newWeights}
@@ -78,7 +86,8 @@ def launchTraining(weights : dict, biases : dict, model : dict, datas : dict) :
             caches = grd.forwardPropagation(aWeights, aBiases, batchData, activationByLayer)
             yPredicted[:, j:j + batchSize] = caches["A"][f"l{len(aWeights)}"]
             newWeights, biases, vW, vB = grd.backwardPropagation(datas["yRealResultsTrain"][:, j:j + batchSize], caches, aWeights, activationByLayer, lossFct, learningRate, aBiases, vW, vB)
-       
+        recordedWeights.append(newWeights)
+        recordedBiases.append(biases)
         yPredictedVal = tls.getPredictedValues(newWeights, biases, datas["normalizedDatasVal"], activationByLayer)
         
         loss, accuracy = tls.getEvaluationMetrics(yPredicted, datas["yRealResultsTrain"])
@@ -89,6 +98,25 @@ def launchTraining(weights : dict, biases : dict, model : dict, datas : dict) :
             print(f"    accuracy : {accuracy:.4f} - val_accuracy : {accuracyVal:.4f}")
         
         graphDatas[i - 1] = [loss, valLoss, accuracy, accuracyVal]
+
+        # early stopping
+        if i == 1 :
+            valLossMin = valLoss
+        if valLoss > valLossMin :
+            patience -= 1
+            if patience == 0 :
+                graphDatas = graphDatas[:i]
+                newWeights = recordedWeights[iMax]
+                biases = recordedBiases[iMax]
+                metr = graphDatas[iMax - 1]
+                print(f"Early stopping at epoch {i} - returing to state at epoch {iMax}")
+                print(f"    epoch {iMax}/{epochs} - loss : {metr[0]:.4f} - val_loss : {metr[1]:.4f}")
+                print(f"        accuracy : {metr[2]:.4f} - val_accuracy : {metr[3]:.4f}")
+                break
+        else :
+            valLossMin = valLoss
+            iMax = i
+            patience = PATIENCE
 
     return newWeights, biases, graphDatas
 
@@ -101,24 +129,24 @@ def main() :
         
         # step 1 : load and process the datas
         print("Loading datas...")
+        datasForTraining = {}
         normalizedDatas, numDatasParams, binaryResultsByClasses, targetClasses = tls.loadDatas(sys.argv[1], sys.argv[5])
         normalizedDatasVal, numDatasParamsVal, binaryResultsByClassesVal, tc = tls.loadDatas(sys.argv[2], sys.argv[5])
+        datasForTraining["normalizedDatas"] = normalizedDatas.to_numpy()
+        datasForTraining["normalizedDatasVal"] = normalizedDatasVal.to_numpy()
 
         # step 2 : load the json network architecture
         model = dst.loadParseJsonNetwork(sys.argv[3])
 
         # step 3 : build the weight matrices + initialization
         print("Building weights...")
-        weights = w.weightsInit(normalizedDatas, binaryResultsByClasses, model[model["model_fit"]["network"]])
+        weights = w.weightsInit(datasForTraining["normalizedDatas"], binaryResultsByClasses, model[model["model_fit"]["network"]])
 
         # step 4 : prepare the bias
         biases = {f"l{i + 1}": np.full((weights[f"l{i + 1}"].shape[0], 1), 0.001) for i in range(len(weights))}
 
         # step 5 : gradiant descent
-        print(f"Training of model {model['model_fit']['network']} started")
-        datasForTraining = {}
-        datasForTraining["normalizedDatas"] = normalizedDatas.to_numpy()
-        datasForTraining["normalizedDatasVal"] = normalizedDatasVal.to_numpy()
+        print(f"Training of model '{model['model_fit']['network']}' started")
         datasForTraining["yRealResultsTrain"] = binaryResultsByClasses
         datasForTraining["yRealResultsVal"] = binaryResultsByClassesVal
         weights, biases, graphDatas = launchTraining(weights, biases, model, datasForTraining)

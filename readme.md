@@ -36,6 +36,15 @@ Load a dataset to predict, the neural network parameter file, and save the resul
 python3 predict.py <validation_dataset.csv> <modelParameters.json> <csv output name>
 ```
 
+## Comparison Program
+Compare different models on one graph. The mode parameter determines the comparison type:
+- **network**: Compares different network architectures.
+- **learning_rate**: Compares different learning rates for the network.
+
+```bash
+python3 compare.py <dataset.csv> <validation_dataset.csv> <model.json> <target column name> <mode>
+```
+
 ## Guide to Creating a `network.json` File
 This JSON file is used to define the structure of an artificial neural network and the training parameters. Multiple networks can be defined in the file, but only the one specified in the `model_fit` section will be considered.
 
