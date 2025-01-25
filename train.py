@@ -8,6 +8,7 @@ import sys
 import matplotlib
 import matplotlib.pyplot as plt
 
+BETA = 0.9
 
 def checkArgs(args) -> bool :
     if len(args) != 6:
@@ -66,20 +67,26 @@ def launchTraining(weights : dict, biases : dict, model : dict, datas : dict) :
     if datas["yRealResultsTrain"].shape[0] != 2:
         raise AssertionError("Only binary classification is supported")
 
+    vW = {key: np.zeros_like(weights[key]) for key in weights}
+    vB = {key: np.zeros_like(biases[key]) for key in biases}
+
     for i in range(1, epochs + 1):
         for j in range(0, len(datas["normalizedDatas"]), batchSize) :
+            aWeights = {key: newWeights[key] - BETA * vW[key] for key in newWeights}
+            aBiases = {key: biases[key] - BETA * vB[key] for key in biases}
             batchData = np.transpose(datas["normalizedDatas"][j:j + batchSize])
-            caches = grd.forwardPropagation(newWeights, biases, batchData, activationByLayer)
-            yPredicted[:, j:j + batchSize] = caches["A"][f"l{len(newWeights)}"]
-            newWeights, biases = grd.backwardPropagation(datas["yRealResultsTrain"][:, j:j + batchSize], caches, newWeights, activationByLayer, lossFct, learningRate, biases)
+            caches = grd.forwardPropagation(aWeights, aBiases, batchData, activationByLayer)
+            yPredicted[:, j:j + batchSize] = caches["A"][f"l{len(aWeights)}"]
+            newWeights, biases, vW, vB = grd.backwardPropagation(datas["yRealResultsTrain"][:, j:j + batchSize], caches, aWeights, activationByLayer, lossFct, learningRate, aBiases, vW, vB)
        
         yPredictedVal = tls.getPredictedValues(newWeights, biases, datas["normalizedDatasVal"], activationByLayer)
         
         loss, accuracy = tls.getEvaluationMetrics(yPredicted, datas["yRealResultsTrain"])
         valLoss, accuracyVal = tls.getEvaluationMetrics(yPredictedVal, datas["yRealResultsVal"])
 
-        print(f"epoch {i}/{epochs} - loss : {loss:.4f} - val_loss : {valLoss:.4f}")
-        print(f"    accuracy : {accuracy:.4f} - val_accuracy : {accuracyVal:.4f}")
+        if i % 5 == 0 :
+            print(f"epoch {i}/{epochs} - loss : {loss:.4f} - val_loss : {valLoss:.4f}")
+            print(f"    accuracy : {accuracy:.4f} - val_accuracy : {accuracyVal:.4f}")
         
         graphDatas[i - 1] = [loss, valLoss, accuracy, accuracyVal]
 
@@ -125,7 +132,7 @@ def main() :
 
     except Exception as e :
         print(f"Error : {e}")
-        # raise Exception(f"Error : {e}")
+        raise Exception(f"Error : {e}")
 
 
 if __name__ == "__main__" :

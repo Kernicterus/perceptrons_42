@@ -156,7 +156,7 @@
     "model_fit" : {
         "network" : "network_relu_heU_little",
         "loss" : "binaryCrossEntropy",
-        "learning_rate" : 0.1,
+        "learning_rate" : 0.01,
         "batch_size" : 14,
         "epochs" : 70
     }

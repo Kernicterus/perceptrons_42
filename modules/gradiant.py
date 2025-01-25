@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import modules.mathFunctions as fct
 
+BETA = 0.9
 
 functionMap = {
     "sigmoid" : fct.sigmoid,
@@ -59,6 +60,7 @@ def forwardPropagation(weights : dict[np.ndarray], biases : dict, batchData, act
     - activationsByLayer : the activations functions by layer
     Return : the caches containing the Zb (no activated) and A (activated) values
     """
+
     cacheZb = {}
     cacheA = {}
     for i in range(len(weights)) :
@@ -82,16 +84,7 @@ def forwardPropagation(weights : dict[np.ndarray], biases : dict, batchData, act
     return caches
 
 
-def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], weights : list[np.ndarray],
-                        activationByLayer : list, lossFct : str, learningRate, biases : dict) -> list[np.ndarray]:
-    """
-    Function to do the backward propagation of the network. In the first part, it calculates the errors and 
-    in the second part, updates the weights and biases of the network by taking the errors and the 
-    learning rate into account.
-    Returns the new weights and biases
-    """
-    # errors calculations
-    batchSize = len(yRealResults)
+def getAllDeltas(yRealResults : np.ndarray, caches : dict[np.ndarray], weights : list[np.ndarray], activationByLayer : list, lossFct : str) -> dict[np.ndarray] :
     nLayer = len(activationByLayer)
     deltas = {}
     for layer in range(nLayer - 1, 0, -1) :
@@ -99,14 +92,37 @@ def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], we
             deltas[f"l{layer}"] = getDeltaOutputLayer(activationByLayer[layer], lossFct, yRealResults, caches["A"][f"l{layer}"])
         else : 
             deltas[f"l{layer}"] = (partialDerivativeMap[activationByLayer[layer]](caches["A"][f"l{layer}"])) * np.dot(np.transpose(weights[f"l{layer + 1}"]), deltas[f"l{layer + 1}"])
+    return deltas
+
+
+def backwardPropagation(yRealResults : np.ndarray, caches : dict[np.ndarray], weights : list[np.ndarray],
+                        activationByLayer : list, lossFct : str, learningRate, biases : dict, vW, vB) -> list[np.ndarray]:
+    """
+    Function to do the backward propagation of the network. In the first part, it calculates the errors and 
+    in the second part, updates the weights and biases of the network by taking the errors and the 
+    learning rate into account.
+    Returns the new weights and biases
+    """
+    # errors calculations
+    deltas = getAllDeltas(yRealResults, caches, weights, activationByLayer, lossFct)
 
     # weights upd
     newWeights = {}
     batchSize = len(yRealResults[0])
 
     for id, key in enumerate(weights) :
-        deltaW = np.dot(deltas[f"l{id + 1}"], np.transpose(caches["A"][f"l{id}"])) /batchSize
-        array = weights[key] - learningRate * deltaW
-        biases[f"l{id + 1}"] = biases[f"l{id + 1}"] - learningRate / batchSize * np.sum(deltas[f"l{id + 1}"], axis=1, keepdims=True)
-        newWeights[f"l{id + 1}"] = (array)
-    return newWeights, biases
+        deltaW = np.dot(deltas[f"l{id + 1}"], np.transpose(caches["A"][f"l{id}"])) / batchSize
+        deltaB = np.sum(deltas[f"l{id + 1}"], axis=1, keepdims=True) / batchSize
+        
+        # gradiant descent basic
+        # biases[f"l{id + 1}"] = biases[f"l{id + 1}"] - learningRate * deltaB
+        # array = weights[key] - learningRate * deltaW
+        # newWeights[f"l{id + 1}"] = (array)
+
+        # Nesterov Accelerated Gradient
+        vW[key] = BETA * vW[key] + learningRate * deltaW
+        vB[key] = BETA * vB[key] + learningRate * deltaB
+
+        newWeights[f"l{id + 1}"] = weights[key] - vW[key]
+        biases[f"l{id + 1}"] = biases[f"l{id + 1}"] - vB[key]
+    return newWeights, biases, vW, vB
