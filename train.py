@@ -61,7 +61,6 @@ def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : n
             valLoss = mf.binaryCrossEntropy(yPredictedVal[0], yRealResults[0])
             print(f"epoch {i}/{epochs} - loss : {loss:.4f} - val_loss : {valLoss:.4f}")
             graphDatas[i - 1] = [loss, valLoss]
-            plt.plot(i, valLoss, "b", linestyle=':')
         else :
             raise AssertionError("Only binary classification is supported")
     return newWeights, biases, graphDatas
