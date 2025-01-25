@@ -28,7 +28,7 @@ def graphManager(graphDatas : np.ndarray) :
     epochs = range(1, len(graphDatas) + 1)
     losses = graphDatas[:, 0]
     valLosses = graphDatas[:, 1]
-    plt.title("Loss evolution")
+    plt.title("Loss evolution (BCE function)")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.plot(epochs, losses, color='red', linestyle='-', label='train')
@@ -38,7 +38,7 @@ def graphManager(graphDatas : np.ndarray) :
     # plt.show()
 
 
-def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : np.ndarray, normalizedDatasVal : np.ndarray, yRealResults : np.ndarray, biases : dict) :
+def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : np.ndarray, normalizedDatasVal : np.ndarray, yRealResults : np.ndarray, yRealResultsVal, biases : dict) :
     learningRate = model["model_fit"]["learning_rate"] 
     batchSize = model["model_fit"]["batch_size"] 
     epochs = model["model_fit"]["epochs"] 
@@ -55,10 +55,10 @@ def launchTraining(weights : dict[np.ndarray], model : dict, normalizedDatas : n
             newWeights, biases = grd.backwardPropagation(yRealResults[:, j:j + batchSize], caches, newWeights, activationByLayer, lossFct, learningRate, biases)
         if yRealResults.shape[0] == 2:
             loss = mf.binaryCrossEntropy(yPredicted[0], yRealResults[0])
-            datasVal = np.transpose(normalizedDatas)
+            datasVal = np.transpose(normalizedDatasVal)
             cachesVal = grd.forwardPropagation(newWeights, biases, datasVal, activationByLayer)
             yPredictedVal = cachesVal["A"][f"l{len(newWeights)}"]
-            valLoss = mf.binaryCrossEntropy(yPredictedVal[0], yRealResults[0])
+            valLoss = mf.binaryCrossEntropy(yPredictedVal[0], yRealResultsVal[0])
             print(f"epoch {i}/{epochs} - loss : {loss:.4f} - val_loss : {valLoss:.4f}")
             graphDatas[i - 1] = [loss, valLoss]
         else :
@@ -91,6 +91,7 @@ def main() :
 
         # step 4 : extract and prepare the results : M=1, B=0
         binaryResultsByClasses, targetClasses = dst.targetBinarization(datas[targetColumnName])
+        binaryResultsByClassesVal, targetClassesVal = dst.targetBinarization(datasVal[targetColumnName])
 
         # step 5 : load the json network architecture
         model = dst.loadParseJsonNetwork(sys.argv[2])
@@ -104,7 +105,7 @@ def main() :
         # step 7 : gradiant descent
         normalizedDatasNp = normalizedDatas.to_numpy()
         normalizedDatasValNp = normalizedDatasVal.to_numpy()
-        weights, biases, graphDatas = launchTraining(weights, model, normalizedDatasNp, normalizedDatasValNp,binaryResultsByClasses, biases)
+        weights, biases, graphDatas = launchTraining(weights, model, normalizedDatasNp, normalizedDatasValNp,binaryResultsByClasses, binaryResultsByClassesVal, biases)
 
         # step 8 : save the weights and the parameters
         dst.saveTrainingParameters(sys.argv[3], model, weights, biases, numDatasParams, targetColumnName, targetClasses)
