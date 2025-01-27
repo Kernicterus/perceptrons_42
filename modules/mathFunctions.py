@@ -81,10 +81,3 @@ def binaryCrossEntropy(yPredicted, yTrueResults) :
     loss = -1 / m * np.sum(yTrueResults * np.log(yPredicted) + (1 - yTrueResults) * np.log(1 - yPredicted))
     return loss
     
-
-def bCrossEntrDerivBias() :
-    pass
-
-
-def bCrossEntrDerivative(yPredicted, yTrueResults):
-    pass

@@ -24,7 +24,7 @@
             "weights_init": "heUniform"
         },
         "output_layer": {
-            "activation" : "softmax",
+            "activation" : "sigmoid",
             "weights_init" : "heUniform"
         }
     },
@@ -154,7 +154,7 @@
         }
     },
     "model_fit" : {
-        "network" : "network_sigm_heN",
+        "network" : "network_relu_heU",
         "loss" : "binaryCrossEntropy",
         "learning_rate" : 0.01,
         "batch_size" : 14,

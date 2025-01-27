@@ -27,7 +27,7 @@ def checkArgs(args) -> bool :
     return True
 
 
-def graphManager(graphDatas : dict, epochs) :
+def graphManager(graphDatas : dict, epochs, outputName : str) :
     epochs = range(0, epochs + 1)
     for key in graphDatas:
         plt.plot(epochs, graphDatas[key], linestyle='-', label=f"model_{key}")
@@ -37,7 +37,7 @@ def graphManager(graphDatas : dict, epochs) :
     plt.ylabel("Accuracy")
     plt.legend()
 
-    plt.savefig("modelComparaison.png")
+    plt.savefig(outputName)
     # plt.show()
 
 
@@ -87,7 +87,7 @@ def launchTrainingLearningRate(model : dict, datas : dict) :
         accuraciesDatas[f"{item}_LR"] = launchTraining(weights, biases, model, datas, model["model_fit"]["network"], item)
 
     # step 5 : graph
-    graphManager(accuraciesDatas, model["model_fit"]["epochs"])
+    graphManager(accuraciesDatas, model["model_fit"]["epochs"], "ModelComparisonLR.png")
 
 
 def launchTrainingNetwork(model : dict, datas : dict) :
@@ -99,7 +99,7 @@ def launchTrainingNetwork(model : dict, datas : dict) :
             accuraciesDatas[key] = launchTraining(weights, biases, model, datas, key, model["model_fit"]["learning_rate"])
 
     # step 5 : graph
-    graphManager(accuraciesDatas, model["model_fit"]["epochs"])
+    graphManager(accuraciesDatas, model["model_fit"]["epochs"], "ModelComparisonNtw.png")
 
 
 def main() :

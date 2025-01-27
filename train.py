@@ -101,8 +101,8 @@ def launchTraining(weights : dict, biases : dict, model : dict, datas : dict) :
 
         # early stopping
         if i == 1 :
-            valLossMin = valLoss
-        if valLoss > valLossMin :
+            accMax = accuracyVal
+        if accuracyVal < accMax :
             patience -= 1
             if patience == 0 :
                 graphDatas = graphDatas[:i]
@@ -114,7 +114,7 @@ def launchTraining(weights : dict, biases : dict, model : dict, datas : dict) :
                 print(f"        accuracy : {metr[2]:.4f} - val_accuracy : {metr[3]:.4f}")
                 break
         else :
-            valLossMin = valLoss
+            accMax = accuracyVal
             iMax = i
             patience = PATIENCE
 
@@ -160,7 +160,7 @@ def main() :
 
     except Exception as e :
         print(f"Error : {e}")
-        raise Exception(f"Error : {e}")
+        # raise Exception(f"Error : {e}")
 
 
 if __name__ == "__main__" :

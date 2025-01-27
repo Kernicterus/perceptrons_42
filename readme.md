@@ -143,7 +143,7 @@ This section defines the training parameters of the model. The available fields 
         "hidden_layer_1": {
             "neurons": 15,
             "activation": "relu",
-            "weights_init": "xavier"
+            "weights_init": "heUniform"
         },
         "hidden_layer_2": {
             "neurons": 10,
@@ -152,7 +152,7 @@ This section defines the training parameters of the model. The available fields 
         },
         "output_layer": {
             "activation": "softmax",
-            "weights_init": "xavier"
+            "weights_init": "heNormal"
         }
     }
 }

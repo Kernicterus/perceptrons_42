@@ -17,7 +17,6 @@ lossMap = {
 }
 
 partialDerivativeMap = {
-    "binaryCrossEntropy" : fct.bCrossEntrDerivative,
     "sigmoid" : fct.sigmoidDerivative,
     "relu"    : fct.reluDerivative,
     "leakyRelu" : fct.leakyReluDerivative,
